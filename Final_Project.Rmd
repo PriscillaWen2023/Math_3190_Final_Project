@@ -11,39 +11,41 @@ urlcolor: blue
 ---
 
 # Introduction
-//Begin paper here
 
-### Background 
+Unsupervised learning foregoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures', (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations. Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet the forthcoming advantage of divisive methods is that they may be parametrized to partition the data into restricted numbers of clusters.
+
+### Background
+
 //Discuss background of our project here
 
-
 # Mathematics behind Divisive Hierarchical Clustering
+
 //Mathematics information here
 
-
 # Analysis on our Dataset
+
 //Analysis here
 
-
 # Diagnostic and Remedial Measures
+
 //Diagnostics here
 
-
 # Strengths, Weaknesses, and Uses
+
 //Information regarding our ML model here
 
-
 # Conclusion
+
 //Conclusion of paper here
 
-
 # References
-//References used here
 
+Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
 
 # RShiny App
+
 // Build RShiny app here
-``` {r}
+
+```{r}
 
 ```
-
