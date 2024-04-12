@@ -43,13 +43,10 @@ Unsupervised learning foregoes the precise prediction of a measured outcome in o
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
 
 # RShiny App
-<<<<<<< HEAD
 
 // Build RShiny app here
 
 ```{r}
-=======
-``` {r}
 library(dendextend)
 library(ggplot2)
 library(plotly)
@@ -57,7 +54,6 @@ library(shiny)
 library(factoextra)
 library(cluster)
 library(stats)
->>>>>>> bed96fa234127ae48e14c35da77bedb67473128f
 
 data = read.csv("Studio Ghibli [TEST].csv", header = TRUE, row.names = 1)
 
@@ -90,10 +86,8 @@ ggplotly(p)
 data_new
 write.csv(data_new, "Studio Ghiblie [TEST2].csv")
 ```
-<<<<<<< HEAD
-=======
 
-``` {r}
+```{r}
 dist_matrix <- dist(data_new)
 hc <- hclust(dist_matrix)
 dend <- as.dendrogram(hc)
@@ -109,7 +103,7 @@ ggplot(dend_colored, horiz = TRUE) + theme_minimal() +
    theme(legend.position="top")
 ```
 
-``` {r}
+```{r}
 # Load necessary libraries
 library(shiny)
 library(shinydashboard)
@@ -196,4 +190,3 @@ server <- function(input, output) {
 # Run the application 
 shinyApp(ui, server)
 ```
->>>>>>> bed96fa234127ae48e14c35da77bedb67473128f
