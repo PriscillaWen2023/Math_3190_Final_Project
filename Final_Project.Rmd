@@ -43,9 +43,157 @@ Unsupervised learning foregoes the precise prediction of a measured outcome in o
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
 
 # RShiny App
+<<<<<<< HEAD
 
 // Build RShiny app here
 
 ```{r}
+=======
+``` {r}
+library(dendextend)
+library(ggplot2)
+library(plotly)
+library(shiny)
+library(factoextra)
+library(cluster)
+library(stats)
+>>>>>>> bed96fa234127ae48e14c35da77bedb67473128f
 
+data = read.csv("Studio Ghibli [TEST].csv", header = TRUE, row.names = 1)
+
+data_new <- na.omit(data)
+data_new <- data_new[c("Year", "Budget", "Revenue", "Duration")]
+col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes")
+data_new <- setNames(data_new, col_names)
+data_new <- matrix(data_new)
+
+data_new
+
+clean_data <- apply(data_new, 2, function(column) {
+  if(any(is.na(column))) {
+    column[is.na(column)] <- mean(column, na.rm = TRUE)
+  }
+  return(column)
+})
+
+dend <- data_new %>%
+  dist() %>%
+  hclust(method = "ave") %>%
+  as.dendrogram()
+dend2 <- color_branches(dend, 5)
+
+p <- ggplot(dend2, horiz = T, offset_labels = -3)
+ggplotly(p)
+
+
+
+data_new
+write.csv(data_new, "Studio Ghiblie [TEST2].csv")
 ```
+<<<<<<< HEAD
+=======
+
+``` {r}
+dist_matrix <- dist(data_new)
+hc <- hclust(dist_matrix)
+dend <- as.dendrogram(hc)
+dend_colored <- color_branches(dend, k = 4)  
+plot(dend_colored, main = "Colored Dendrogram")
+legend("topright", legend = unique(dend_colored$labels$color_groups), 
+       fill = unique(dend_colored$labels$color_groups), title = "Cluster")
+
+# If you prefer ggplot2 for better customization:
+ggplot(dend_colored, horiz = TRUE) + theme_minimal() +
+   geom_segment(aes(x = x, y = y, color = color_groups)) +
+   scale_color_manual(values = unique(dend_colored$labels$color_groups)) +
+   theme(legend.position="top")
+```
+
+``` {r}
+# Load necessary libraries
+library(shiny)
+library(shinydashboard)
+library(stats)
+
+# Define UI for the application
+ui <- dashboardPage(
+  dashboardHeader(title = "Dendrogram Viewer"),
+  dashboardSidebar(
+    fileInput("dataFile", "Choose CSV File",
+              accept = c(
+                "text/csv",
+                "text/comma-separated-values,text/plain",
+                ".csv")),
+    tags$hr(),
+    checkboxInput("header", "Header", TRUE),
+    radioButtons("sep", "Separator",
+                 choices = c(Comma = ",", Semicolon = ";", Tab = "\t"),
+                 selected = ",")
+  ),
+  dashboardBody(
+    plotOutput("dendrogramPlot"),
+    tags$hr(),
+    verbatimTextOutput("fileInfo")
+  )
+)
+
+# Define server logic
+server <- function(input, output) {
+  data <- reactive({
+    inFile <- input$dataFile
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    df <- read.csv(inFile$datapath, header = input$header, sep = input$sep, na.strings = c("NA", "na", ""))
+    df
+  })
+
+  output$fileInfo <- renderPrint({
+    df <- data()
+    if (is.null(df)) {
+      "No file uploaded."
+    } else {
+      summary(df)
+    }
+  })
+
+  output$dendrogramPlot <- renderPlot({
+    df <- data()
+    if (is.null(df)) {
+      return()
+    }
+
+    clean_data <- apply(df, 2, function(column) {
+      if (any(is.na(column))) {
+        column[is.na(column)] <- mean(column, na.rm = TRUE)
+      }
+      return(column)
+    })
+
+    dist_matrix <- tryCatch({
+      dist(clean_data)
+    }, warning = function(w) {
+      cat("Warning: ", w$message, "\n")
+      return(NULL)
+    }, error = function(e) {
+      cat("Error: ", e$message, "\n")
+      return(NULL)
+    })
+    
+    # Execute code that should always run (similar to 'finally')
+    cat("Distance computation attempted.\n")
+
+    dend <- data_new %>%
+      dist() %>%
+      hclust(method = "ave") %>%
+      as.dendrogram()
+    dend2 <- color_branches(dend, 5)
+    p <- ggplot(dend2, horiz = T, offset_labels = -3)
+    ggplotly(p)
+  })
+}
+
+# Run the application 
+shinyApp(ui, server)
+```
+>>>>>>> bed96fa234127ae48e14c35da77bedb67473128f
