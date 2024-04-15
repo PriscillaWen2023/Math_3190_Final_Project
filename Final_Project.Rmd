@@ -33,7 +33,9 @@ Divisive or 'top-down' clustering algorithms have, by the past, been studied les
 
 # Analysis on our Dataset
 
-//Analysis here
+//Analysis here [Cam do this]
+// Add a couple chunks presenting the dataset and what it looks like
+// Discuss hclust() and dist() functions
 
 # Diagnostic and Remedial Measures
 
