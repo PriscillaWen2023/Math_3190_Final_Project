@@ -177,50 +177,6 @@ mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClust
 
 
 # RShiny App
-
-// Build RShiny app here
-
-```{r}
-library(dendextend)
-library(ggplot2)
-library(plotly)
-library(shiny)
-library(factoextra)
-library(cluster)
-library(stats)
-
-data = read.csv("Studio Ghibli [TEST].csv", header = TRUE, row.names = 1)
-
-data_new <- na.omit(data)
-data_new <- data_new[c("Year", "Budget", "Revenue", "Duration")]
-col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes")
-data_new <- setNames(data_new, col_names)
-# data_new <- matrix(data_new)
-
-data_new
-
-clean_data <- apply(data_new, 2, function(column) {
-  if(any(is.na(column))) {
-    column[is.na(column)] <- mean(column, na.rm = TRUE)
-  }
-  return(column)
-})
-
-dend <- data_new %>%
-  dist() %>%
-  hclust(method = "ave") %>%
-  as.dendrogram()
-dend2 <- color_branches(dend, 5)
-
-p <- ggplot(dend2, horiz = T, offset_labels = -3)
-ggplotly(p)
-
-
-
-# data_new
-# write.csv(data_new, "Studio Ghiblie [TEST2].csv")
-```
-
 ```{r}
 library(shiny)
 library(shinydashboard)
@@ -232,6 +188,10 @@ ui <- dashboardPage(
     fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
+    selectInput("distanceType", "Select Distance Type",
+                choices = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"), selected = "euclidean"),
+    selectInput("linkageMethod", "Select Linkage Method",
+                choices = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "complete"),
     actionButton("update", "Update Selection")
   ),
   dashboardBody(
@@ -278,7 +238,7 @@ server <- function(input, output, session) {
     })
 
     dist_matrix <- tryCatch({
-      dist(clean_data)
+      dist(clean_data, method = input$distanceType)
     }, warning = function(w) {
       cat("Warning: ", w$message, "\n")
       return(NULL)
@@ -288,11 +248,52 @@ server <- function(input, output, session) {
     })
 
     if (!is.null(dist_matrix)) {
-      hc <- hclust(dist_matrix)
+      hc <- hclust(dist_matrix, method = input$linkageMethod)
       plot(hc, main = "Dendrogram of Hierarchical Clustering")
     }
   })
 }
 
 shinyApp(ui, server)
+```
+
+```{r}
+library(dendextend)
+library(ggplot2)
+library(plotly)
+library(shiny)
+library(factoextra)
+library(cluster)
+library(stats)
+
+data = read.csv("Studio Ghibli [TEST].csv", header = TRUE, row.names = 1)
+
+data_new <- na.omit(data)
+data_new <- data_new[c("Year", "Budget", "Revenue", "Duration")]
+col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes")
+data_new <- setNames(data_new, col_names)
+# data_new <- matrix(data_new)
+
+data_new
+
+clean_data <- apply(data_new, 2, function(column) {
+  if(any(is.na(column))) {
+    column[is.na(column)] <- mean(column, na.rm = TRUE)
+  }
+  return(column)
+})
+
+dend <- data_new %>%
+  dist() %>%
+  hclust(method = "ave") %>%
+  as.dendrogram()
+dend2 <- color_branches(dend, 5)
+
+p <- ggplot(dend2, horiz = T, offset_labels = -3)
+ggplotly(p)
+
+
+
+# data_new
+# write.csv(data_new, "Studio Ghiblie [TEST2].csv")
 ```
