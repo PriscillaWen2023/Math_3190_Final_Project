@@ -14,7 +14,7 @@ urlcolor: blue
 
 Unsupervised learning is modeling practice which forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
 
-Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters.  Rather, hierarchical clustering is based on a chosen measure of _dissimilarity_ among pairwise observations.  These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters.  This, in its turn, is a modular description of one part of an emergent hierarchy.  The totality of data as a single cluster is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself.
+Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters.  Rather, hierarchical clustering is based on a chosen measure of _dissimilarity_ among pairwise observations.  These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters.  This, in its turn, is a modular description of one part of an emergent hierarchy.  The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself.  This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
 
 Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
 
@@ -171,6 +171,10 @@ Divisive hierarchical clustering (top-down clustering) has several uses across v
 # References
 
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
+
+mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals
+
+
 
 # RShiny App
 
