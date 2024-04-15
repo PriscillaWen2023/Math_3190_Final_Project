@@ -195,7 +195,7 @@ data_new <- na.omit(data)
 data_new <- data_new[c("Year", "Budget", "Revenue", "Duration")]
 col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes")
 data_new <- setNames(data_new, col_names)
-data_new <- matrix(data_new)
+# data_new <- matrix(data_new)
 
 data_new
 
@@ -238,42 +238,36 @@ ggplot(dend_colored, horiz = TRUE) + theme_minimal() +
 ```
 
 ```{r}
-# Load necessary libraries
 library(shiny)
 library(shinydashboard)
 library(stats)
 
-# Define UI for the application
 ui <- dashboardPage(
-  dashboardHeader(title = "Dendrogram Viewer"),
+  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
   dashboardSidebar(
-    fileInput("dataFile", "Choose CSV File",
-              accept = c(
-                "text/csv",
-                "text/comma-separated-values,text/plain",
-                ".csv")),
-    tags$hr(),
-    checkboxInput("header", "Header", TRUE),
-    radioButtons("sep", "Separator",
-                 choices = c(Comma = ",", Semicolon = ";", Tab = "\t"),
-                 selected = ",")
+    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    selectInput("numColumns", "Select numeric columns for clustering",
+                choices = NULL, selected = NULL, multiple = TRUE),
+    actionButton("update", "Update Selection")
   ),
   dashboardBody(
     plotOutput("dendrogramPlot"),
-    tags$hr(),
     verbatimTextOutput("fileInfo")
   )
 )
 
-# Define server logic
-server <- function(input, output) {
+server <- function(input, output, session) {
   data <- reactive({
     inFile <- input$dataFile
     if (is.null(inFile)) {
       return(NULL)
     }
-    df <- read.csv(inFile$datapath, header = input$header, sep = input$sep, na.strings = c("NA", "na", ""))
-    df
+    read.csv(inFile$datapath, na.strings = c("NA", "na", ""))
+  })
+  
+  observe({
+    df <- data()
+    updateSelectInput(session, "numColumns", choices = names(df)[sapply(df, is.numeric)])
   })
 
   output$fileInfo <- renderPrint({
@@ -286,12 +280,13 @@ server <- function(input, output) {
   })
 
   output$dendrogramPlot <- renderPlot({
+    req(input$update)
     df <- data()
-    if (is.null(df)) {
+    if (is.null(df) || is.null(input$numColumns)) {
       return()
     }
-
-    clean_data <- apply(df, 2, function(column) {
+    clean_data <- df[, input$numColumns]
+    clean_data <- apply(clean_data, 2, function(column) {
       if (any(is.na(column))) {
         column[is.na(column)] <- mean(column, na.rm = TRUE)
       }
@@ -307,20 +302,13 @@ server <- function(input, output) {
       cat("Error: ", e$message, "\n")
       return(NULL)
     })
-    
-    # Execute code that should always run (similar to 'finally')
-    cat("Distance computation attempted.\n")
 
-    dend <- data_new %>%
-      dist() %>%
-      hclust(method = "ave") %>%
-      as.dendrogram()
-    dend2 <- color_branches(dend, 5)
-    p <- ggplot(dend2, horiz = T, offset_labels = -3)
-    ggplotly(p)
+    if (!is.null(dist_matrix)) {
+      hc <- hclust(dist_matrix)
+      plot(hc, main = "Dendrogram of Hierarchical Clustering")
+    }
   })
 }
 
-# Run the application 
 shinyApp(ui, server)
 ```
