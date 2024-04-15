@@ -12,15 +12,17 @@ urlcolor: blue
 
 # Introduction
 
-Unsupervised learning foregoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures', (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations. Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet the forthcoming advantage of divisive methods is that they may be parametrized to partition the data into restricted numbers of clusters.
+Unsupervised learning is modeling practice which forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
+
+Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
+
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
 
 ### Background
 
 //Discuss background of our project here
 
 # Mathematics behind Divisive Hierarchical Clustering
-
-//Mathematics information here
 
 # Analysis on our Dataset
 
@@ -67,7 +69,7 @@ The most common diagnostic measure in hierarchical clustering is arguably the de
 
 -   **Compare Results**: Compare dendrograms generated with different parameter settings to identify the most stable and meaningful clustering solution.
 
-**How to compute cophentic correlation?**
+**How to compute cophenetic correlation?**
 
 Cophenetic correlation is a measure of how well a dendrogram preserves the pairwise distances between data points. It assesses the fidelity of a hierarchical clustering solution by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points.
 
@@ -79,7 +81,7 @@ Cophenetic correlation is a measure of how well a dendrogram preserves the pairw
 
 **(4) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances. This correlation coefficient is the cophenetic correlation.
 
-Mathematically, the cophenetic correlation �c is computed using the following formula:
+Mathematically, the cophenetic correlation $c$ is computed using the following formula:
 
 $$c = \frac{\sum_{i < j}(d_{ij} - \bar{d})(c_{ij} - \bar{c})}{\sqrt{\sum_{i < j}(d_{ij} - \bar{d})^2 \sum_{i < j}(c_{ij} - \bar{c})^2}}$$
 
@@ -93,7 +95,7 @@ Where:
 
 -   $\bar{c}$ is the mean of the cophenetic distances.
 
--   The summations are over all pairs of data points $i$ and $j$ with $i$ < $j$.
+-   The summations are over all pairs of data points $i$ and $j$ with $i$ \< $j$.
 
 (5) **Interpretation**: The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
 
@@ -168,6 +170,20 @@ Divisive hierarchical clustering (top-down clustering) has several uses across v
 # References
 
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
+
+mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals
+
+Practical Guide to Cluster Analysis in R , ch9, page 84-96, by A. Kassambara
+
+Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
+
+Murtagh, F. (2011). On ultrametricity, data coding, and computation. Journal of Classification, 28(3), 326-347.
+
+R Development Core Team. (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
+
+Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
+
+Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
 
 # RShiny App
 
