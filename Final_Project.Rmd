@@ -14,9 +14,16 @@ urlcolor: blue
 
 Unsupervised learning is modeling practice which forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
 
+<<<<<<< HEAD
 Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
 
 Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
+=======
+Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters.  Rather, hierarchical clustering is based on a chosen measure of _dissimilarity_ among pairwise observations.  These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters.  This, in its turn, is a modular description of one part of an emergent hierarchy.  The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself.  This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
+
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
+
+>>>>>>> 0d067522c594f10d0e00f2b4c27164c55686e106
 
 ### Background
 
@@ -172,6 +179,7 @@ Divisive hierarchical clustering (top-down clustering) has several uses across v
 Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
 
 mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals
+<<<<<<< HEAD
 
 Practical Guide to Cluster Analysis in R , ch9, page 84-96, by A. Kassambara
 
@@ -186,8 +194,91 @@ Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and 
 Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
 
 # RShiny App
+=======
+>>>>>>> 0d067522c594f10d0e00f2b4c27164c55686e106
 
-// Build RShiny app here
+
+
+# RShiny App
+```{r}
+library(shiny)
+library(shinydashboard)
+library(stats)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
+  dashboardSidebar(
+    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    selectInput("numColumns", "Select numeric columns for clustering",
+                choices = NULL, selected = NULL, multiple = TRUE),
+    selectInput("distanceType", "Select Distance Type",
+                choices = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"), selected = "euclidean"),
+    selectInput("linkageMethod", "Select Linkage Method",
+                choices = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "complete"),
+    actionButton("update", "Update Selection")
+  ),
+  dashboardBody(
+    plotOutput("dendrogramPlot"),
+    verbatimTextOutput("fileInfo")
+  )
+)
+
+server <- function(input, output, session) {
+  data <- reactive({
+    inFile <- input$dataFile
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    read.csv(inFile$datapath, na.strings = c("NA", "na", ""))
+  })
+  
+  observe({
+    df <- data()
+    updateSelectInput(session, "numColumns", choices = names(df)[sapply(df, is.numeric)])
+  })
+
+  output$fileInfo <- renderPrint({
+    df <- data()
+    if (is.null(df)) {
+      "No file uploaded."
+    } else {
+      summary(df)
+    }
+  })
+
+  output$dendrogramPlot <- renderPlot({
+    req(input$update)
+    df <- data()
+    if (is.null(df) || is.null(input$numColumns)) {
+      return()
+    }
+    clean_data <- df[, input$numColumns]
+    clean_data <- apply(clean_data, 2, function(column) {
+      if (any(is.na(column))) {
+        column[is.na(column)] <- mean(column, na.rm = TRUE)
+      }
+      return(column)
+    })
+
+    dist_matrix <- tryCatch({
+      dist(clean_data, method = input$distanceType)
+    }, warning = function(w) {
+      cat("Warning: ", w$message, "\n")
+      return(NULL)
+    }, error = function(e) {
+      cat("Error: ", e$message, "\n")
+      return(NULL)
+    })
+
+    if (!is.null(dist_matrix)) {
+      hc <- hclust(dist_matrix, method = input$linkageMethod)
+      plot(hc, main = "Dendrogram of Hierarchical Clustering")
+    }
+  })
+}
+
+shinyApp(ui, server)
+```
 
 ```{r}
 library(dendextend)
@@ -204,7 +295,7 @@ data_new <- na.omit(data)
 data_new <- data_new[c("Year", "Budget", "Revenue", "Duration")]
 col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes")
 data_new <- setNames(data_new, col_names)
-data_new <- matrix(data_new)
+# data_new <- matrix(data_new)
 
 data_new
 
@@ -226,110 +317,6 @@ ggplotly(p)
 
 
 
-data_new
-write.csv(data_new, "Studio Ghiblie [TEST2].csv")
-```
-
-```{r}
-dist_matrix <- dist(data_new)
-hc <- hclust(dist_matrix)
-dend <- as.dendrogram(hc)
-dend_colored <- color_branches(dend, k = 4)  
-plot(dend_colored, main = "Colored Dendrogram")
-legend("topright", legend = unique(dend_colored$labels$color_groups), 
-       fill = unique(dend_colored$labels$color_groups), title = "Cluster")
-
-# If you prefer ggplot2 for better customization:
-ggplot(dend_colored, horiz = TRUE) + theme_minimal() +
-   geom_segment(aes(x = x, y = y, color = color_groups)) +
-   scale_color_manual(values = unique(dend_colored$labels$color_groups)) +
-   theme(legend.position="top")
-```
-
-```{r}
-# Load necessary libraries
-library(shiny)
-library(shinydashboard)
-library(stats)
-
-# Define UI for the application
-ui <- dashboardPage(
-  dashboardHeader(title = "Dendrogram Viewer"),
-  dashboardSidebar(
-    fileInput("dataFile", "Choose CSV File",
-              accept = c(
-                "text/csv",
-                "text/comma-separated-values,text/plain",
-                ".csv")),
-    tags$hr(),
-    checkboxInput("header", "Header", TRUE),
-    radioButtons("sep", "Separator",
-                 choices = c(Comma = ",", Semicolon = ";", Tab = "\t"),
-                 selected = ",")
-  ),
-  dashboardBody(
-    plotOutput("dendrogramPlot"),
-    tags$hr(),
-    verbatimTextOutput("fileInfo")
-  )
-)
-
-# Define server logic
-server <- function(input, output) {
-  data <- reactive({
-    inFile <- input$dataFile
-    if (is.null(inFile)) {
-      return(NULL)
-    }
-    df <- read.csv(inFile$datapath, header = input$header, sep = input$sep, na.strings = c("NA", "na", ""))
-    df
-  })
-
-  output$fileInfo <- renderPrint({
-    df <- data()
-    if (is.null(df)) {
-      "No file uploaded."
-    } else {
-      summary(df)
-    }
-  })
-
-  output$dendrogramPlot <- renderPlot({
-    df <- data()
-    if (is.null(df)) {
-      return()
-    }
-
-    clean_data <- apply(df, 2, function(column) {
-      if (any(is.na(column))) {
-        column[is.na(column)] <- mean(column, na.rm = TRUE)
-      }
-      return(column)
-    })
-
-    dist_matrix <- tryCatch({
-      dist(clean_data)
-    }, warning = function(w) {
-      cat("Warning: ", w$message, "\n")
-      return(NULL)
-    }, error = function(e) {
-      cat("Error: ", e$message, "\n")
-      return(NULL)
-    })
-    
-    # Execute code that should always run (similar to 'finally')
-    cat("Distance computation attempted.\n")
-
-    dend <- data_new %>%
-      dist() %>%
-      hclust(method = "ave") %>%
-      as.dendrogram()
-    dend2 <- color_branches(dend, 5)
-    p <- ggplot(dend2, horiz = T, offset_labels = -3)
-    ggplotly(p)
-  })
-}
-
-# Run the application 
-shinyApp(ui, server)
+# data_new
+# write.csv(data_new, "Studio Ghiblie [TEST2].csv")
 ```
