@@ -217,24 +217,8 @@ ggplotly(p)
 
 
 
-data_new
-write.csv(data_new, "Studio Ghiblie [TEST2].csv")
-```
-
-```{r}
-dist_matrix <- dist(data_new)
-hc <- hclust(dist_matrix)
-dend <- as.dendrogram(hc)
-dend_colored <- color_branches(dend, k = 4)  
-plot(dend_colored, main = "Colored Dendrogram")
-legend("topright", legend = unique(dend_colored$labels$color_groups), 
-       fill = unique(dend_colored$labels$color_groups), title = "Cluster")
-
-# If you prefer ggplot2 for better customization:
-ggplot(dend_colored, horiz = TRUE) + theme_minimal() +
-   geom_segment(aes(x = x, y = y, color = color_groups)) +
-   scale_color_manual(values = unique(dend_colored$labels$color_groups)) +
-   theme(legend.position="top")
+# data_new
+# write.csv(data_new, "Studio Ghiblie [TEST2].csv")
 ```
 
 ```{r}
