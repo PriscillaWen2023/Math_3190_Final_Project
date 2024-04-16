@@ -6,7 +6,7 @@ output: html_document
 header-includes:
    - \usepackage{multirow}
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 urlcolor: blue
 ---
 
@@ -14,12 +14,15 @@ urlcolor: blue
 
 Unsupervised learning is modeling practice which forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
 
-Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters.  Rather, hierarchical clustering is based on a chosen measure of _dissimilarity_ among pairwise observations.  These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters.  This, in its turn, is a modular description of one part of an emergent hierarchy.  The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself.  This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
+\<\<\<\<\<\<\< HEAD Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
 
 Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
 
+Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
 
-### Background
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
+
+## Background
 
 //Discuss background of our project here
 
@@ -27,156 +30,8 @@ Divisive or 'top-down' clustering algorithms have, by the past, been studied les
 
 # Analysis on our Dataset
 
-//Analysis here
+## RShiny App
 
-# Diagnostic and Remedial Measures
-
-### **1. Dendrogram:**
-
-\
-The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
-
-**How to use dendrogram?**
-
-**(1) Visual Inspection:**
-
--   **Observe the Overall Structure**: Start by examining the overall structure of the dendrogram. Look for patterns of clustering and the hierarchy of clusters.
-
--   **Check the Branch Lengths**: Longer branches represent greater dissimilarity between clusters. Pay attention to abrupt changes in branch lengths, which may indicate significant differences between clusters.
-
--   **Identify Cluster Cuts**: Look for natural breaks or clusters where the dendrogram is cut. These cuts represent the division points where clusters are formed.
-
-**(2) Determining the Number of Clusters:**
-
--   **Horizontal Cuts**: Imagine drawing a horizontal line across the dendrogram. The number of times this line intersects the vertical lines (branches) indicates the number of clusters.
-
--   **Natural Breaks**: Identify points in the dendrogram where there are large gaps between branches. These points often correspond to natural breaks in the data and suggest the optimal number of clusters.
-
-**(3) Assessing Cluster Sizes:**
-
--   **Cluster Size Distribution**: Examine the distribution of cluster sizes by looking at the heights of the dendrogram branches. Ensure that the resulting clusters are of reasonable sizes and not overly skewed.
-
--   **Balanced Clusters**: Ideally, clusters should have approximately equal numbers of data points, but this may vary depending on the nature of the data and the clustering objectives.
-
-**(4) Identifying Inconsistencies:**
-
--   **Inconsistent Merging**: Look for instances where clusters are merged at varying distances. Inconsistent merging may indicate suboptimal clustering or noisy data.
-
--   **Abnormal Patterns**: Watch out for abnormal patterns such as clusters merging and then splitting again shortly afterward. These patterns may suggest errors in the clustering process or the presence of outliers.
-
-**(5) Iterative Refinement:**
-
--   **Experiment with Parameters**: Adjust clustering parameters such as distance metrics or linkage methods and observe the changes in the dendrogram structure.
-
--   **Compare Results**: Compare dendrograms generated with different parameter settings to identify the most stable and meaningful clustering solution.
-
-**How to compute cophenetic correlation?**
-
-Cophenetic correlation is a measure of how well a dendrogram preserves the pairwise distances between data points. It assesses the fidelity of a hierarchical clustering solution by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points.
-
-**(1) Compute the Original Pairwise Distances**: Start by calculating the pairwise distances between all data points in the original dataset using an appropriate distance metric (e.g., Euclidean distance, Manhattan distance, etc.).
-
-**(2) Perform Hierarchical Clustering**: Apply hierarchical clustering to the dataset using a chosen linkage method and distance metric. This results in a dendrogram representing the hierarchical clustering structure.
-
-**(3) Compute Cophenetic Distances**: For each pair of data points, calculate the cophenetic distance, which is the height at which the two points are first merged into the same cluster in the dendrogram.
-
-**(4) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances. This correlation coefficient is the cophenetic correlation.
-
-Mathematically, the cophenetic correlation $c$ is computed using the following formula:
-
-$$c = \frac{\sum_{i < j}(d_{ij} - \bar{d})(c_{ij} - \bar{c})}{\sqrt{\sum_{i < j}(d_{ij} - \bar{d})^2 \sum_{i < j}(c_{ij} - \bar{c})^2}}$$
-
-Where:
-
--   $d_{ij}$ is the original pairwise distance between data points $i$ and $j$.
-
--   $c_{ij}$ is the cophenetic distance between data points $i$ and $j$ in the dendrogram.
-
--   $\bar{d}$ is the mean of the original pairwise distances.
-
--   $\bar{c}$ is the mean of the cophenetic distances.
-
--   The summations are over all pairs of data points $i$ and $j$ with $i$ \< $j$.
-
-(5) **Interpretation**: The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
-
-### **2. Silhouette Coefficient**
-
-The Silhouette Coefficient is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation). Silhouette Coefficient measures the relative distance between a data point and its own cluster versus neighboring clusters, providing insight into the quality and separation of clusters in a dataset.
-
-It ranges from -1 to 1, where a high value indicates that the object is well matched to its own cluster and poorly matched to neighboring clusters.
-
-How to Compute Silhouette Coefficient?
-
-(1) Compute the average distance from a single data point $i$ to all other points in the same cluster. Let this be denoted as $a_i$​.
-
-(2) For each neighboring cluster (clusters other than the cluster $i$ belongs to), compute the average distance from $i$ to all points in that cluster. Let the minimum of these distances be denoted as $b_i$​.
-
-(3) Compute the silhouette coefficient $s_i$​ for data point $i$ using the formula:
-
-$$
-s_i=\frac{b_i - a_i}{max(a_i, b_i)}
-$$
-
-(4) Repeat steps (1)-(3) for all data points.
-
-(5) Finally, compute the overall Silhouette Coefficient as the mean of all $s_i$​ values.
-
-$s_i​$ represents the Silhouette Coefficient for data point $i$, $a_i$​ represents the average distance from $i$ to all other points in the same cluster, and $b_i$​ represents the minimum average distance from $i$ to all points in neighboring clusters.
-
-# Strengths, Weaknesses
-
-### Strengths:
-
-1.  **Interpretability**: Divisive clustering produces a hierarchical structure of clusters, making it easier to interpret and understand the relationships between clusters at different levels of granularity. This hierarchical representation can provide insights into the natural grouping of data and the hierarchical organization of clusters.
-
-2.  **Flexibility**: Divisive clustering allows for the exploration of clusters at multiple levels of detail. Analysts can start with a single cluster encompassing all data points and recursively divide it into smaller clusters until reaching the desired level of granularity. This flexibility allows for adaptive clustering based on the characteristics of the data and the analytical objectives.
-
-3.  **Scalability**: Divisive clustering can be more computationally efficient than agglomerative clustering, especially for large datasets. Since divisive clustering starts with a single cluster and recursively divides it into smaller clusters, it can be less computationally intensive than agglomerative clustering, which involves pairwise comparisons and merging of clusters.
-
-4.  **Hierarchy Preservation**: Divisive clustering preserves the hierarchical relationships between clusters throughout the clustering process. This hierarchical structure provides additional context and information about the relationships between clusters, which can be useful for downstream analysis tasks such as visualization, interpretation, and pattern discovery.
-
-5.  **Top-Down Exploration**: Divisive clustering allows analysts to perform top-down exploration of the data, starting with a global view of the entire dataset and progressively refining the clustering structure to reveal finer-grained patterns and relationships. This top-down approach can be beneficial for gaining insights into the hierarchical organization of data and identifying clusters at different levels of abstraction.
-
-### Weaknesses:
-
-1.  **Sensitivity to Initial Conditions**: Divisive clustering heavily relies on the initial selection of clusters, which can affect the final clustering results. Depending on the choice of initial cluster seeds, the algorithm may converge to different solutions, leading to variations in the clustering outcome.
-
-2.  **Computational Complexity**: Divisive clustering can be computationally intensive, especially for large datasets. Since it involves recursively dividing clusters into smaller clusters, the algorithm's complexity increases with the number of data points and the depth of the clustering hierarchy. This can make divisive clustering less scalable for very large datasets compared to other clustering methods.
-
-3.  **Over-Splitting**: Divisive clustering may suffer from over-splitting, where the algorithm continues to divide clusters until each data point forms its own cluster. This can result in excessively fine-grained clusters that may not capture meaningful patterns or relationships in the data. Over-splitting can occur if the algorithm's stopping criterion is not well-defined or if the data lacks clear natural clustering structure.
-
-4.  **Difficulty in Determining the Number of Clusters**: Unlike some other clustering methods that produce a fixed number of clusters as output, divisive clustering generates a hierarchy of clusters, making it challenging to determine the optimal number of clusters. Analysts may need to rely on heuristic approaches or domain knowledge to interpret the clustering hierarchy and select an appropriate level of granularity.
-
-5.  **Interpretability of Deep Hierarchies**: Divisive clustering can produce deep hierarchical structures with multiple levels of nesting, which may be difficult to interpret and visualize. Deep hierarchies may obscure meaningful patterns in the data and make it challenging to extract actionable insights from the clustering results.
-
-6.  **Dependency on Distance Metric**: The choice of distance metric used in divisive clustering can significantly impact the clustering results. Different distance metrics may lead to different clustering outcomes, making it important to carefully select an appropriate distance measure based on the characteristics of the data and the clustering objectives.
-
-# Applications:
-
-Divisive hierarchical clustering (top-down clustering) has several uses across various fields due to its interpretability, flexibility, and ability to reveal hierarchical relationships within data. Some common applications of divisive hierarchical clustering include:
-
-1.  **Exploratory Data Analysis**: Divisive clustering can be used for exploratory analysis to uncover hidden patterns, structures, and relationships within datasets. By recursively dividing clusters into smaller sub-clusters, analysts can gain insights into the hierarchical organization of data and identify meaningful groupings of data points.
-
-2.  **Taxonomy Construction**: Divisive clustering is commonly used in taxonomy construction to classify organisms, species, or other entities into hierarchical categories. By clustering data based on similarities in attributes or characteristics, divisive clustering can help construct taxonomic hierarchies that reflect the evolutionary relationships between different groups.
-
-3.  **Market Segmentation**: Divisive clustering is employed in market segmentation to identify distinct segments or subgroups of customers based on their purchasing behavior, preferences, demographics, or other characteristics. By partitioning the customer base into hierarchical segments, businesses can tailor marketing strategies and product offerings to better meet the needs of different customer segments.
-
-4.  **Image Segmentation**: Divisive clustering is used in image processing and computer vision to segment images into meaningful regions or objects. By recursively dividing image pixels into clusters based on color, texture, or intensity similarities, divisive clustering can help separate foreground objects from background and segment complex scenes into semantically meaningful regions.
-
-5.  **Biological Data Analysis**: Divisive clustering is applied in biological data analysis to classify gene expression patterns, protein sequences, or other biological data into hierarchical clusters. By grouping genes or proteins based on similarities in expression profiles or sequences, divisive clustering can help identify functional relationships and regulatory mechanisms within biological systems.
-
-6.  **Document Clustering**: Divisive clustering is used in text mining and natural language processing to cluster documents or text data into hierarchical categories. By partitioning documents based on similarities in content or topics, divisive clustering can help organize large document collections, facilitate information retrieval, and support document summarization and categorization tasks.
-
-# References
-
-Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
-
-mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals
-
-
-
-# RShiny App
 ```{r}
 library(shiny)
 library(shinydashboard)
@@ -297,3 +152,402 @@ ggplotly(p)
 # data_new
 # write.csv(data_new, "Studio Ghiblie [TEST2].csv")
 ```
+
+# Diagnostic and Remedial Measures
+
+### **1. Dendrogram:**
+
+\
+The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
+
+**How to compute cophenetic correlation?**
+
+Cophenetic correlation is a measure of how well a dendrogram preserves the pairwise distances between data points. It assesses the fidelity of a hierarchical clustering solution by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points.
+
+**(1) Compute the Original Pairwise Distances**: Start by calculating the pairwise distances between all data points in the original dataset using an appropriate distance metric (e.g., Euclidean distance, Manhattan distance, etc.).
+
+**(2) Perform Hierarchical Clustering**: Apply hierarchical clustering to the dataset using a chosen linkage method and distance metric. This results in a dendrogram representing the hierarchical clustering structure.
+
+**(3) Compute Cophenetic Distances**: For each pair of data points, calculate the cophenetic distance, which is the height at which the two points are first merged into the same cluster in the dendrogram.
+
+**(4) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances. This correlation coefficient is the cophenetic correlation.
+
+Mathematically, the cophenetic correlation $c$ is computed using the following formula:
+
+$$c = \frac{\sum_{i < j}(d_{ij} - \bar{d})(c_{ij} - \bar{c})}{\sqrt{\sum_{i < j}(d_{ij} - \bar{d})^2 \sum_{i < j}(c_{ij} - \bar{c})^2}}$$
+
+Where:
+
+-   $d_{ij}$ is the original pairwise distance between data points $i$ and $j$.
+
+-   $c_{ij}$ is the cophenetic distance between data points $i$ and $j$ in the dendrogram.
+
+-   $\bar{d}$ is the mean of the original pairwise distances.
+
+-   $\bar{c}$ is the mean of the cophenetic distances.
+
+-   The summations are over all pairs of data points $i$ and $j$ with $i$ \< $j$.
+
+(5) **Interpretation**: The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
+
+```{r message=FALSE}
+library(dendextend)
+library(ggplot2)
+library(plotly)
+library(factoextra)
+library(cluster)
+library(stats)
+
+# Read the Studio Ghibli dataset from URL
+url <- "https://raw.githubusercontent.com/cham24/Math_3190_Final_Project/main/Studio%20Ghibli%20%5Bwith%20rating%5D.csv"
+data <- read.csv(url, header = TRUE)
+
+# Remove rows with missing values and select specific columns
+data_new <- na.omit(data)
+data_new <- data_new[c("Year", "Budget", "Revenue", "Duration", "Rating.based.on.10.", "Vote..in.kilo.")]
+
+# Rename columns
+col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes", "Rating", "Vote_in_kilo")
+colnames(data_new) <- col_names
+```
+
+```{r}
+library(cluster)
+
+# List of distance metrics
+distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
+
+# List of linkage methods
+linkage_methods <- c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid")
+
+# Initialize variables to store highest Cophenetic correlation and corresponding parameters
+high_cophenet_corr <- 0
+high_dm_lm <- c("", "")
+
+# Compute Cophenetic correlations for each combination of distance metric and linkage method
+for (dm in distance_metrics) {
+    for (lm in linkage_methods) {
+        # Perform hierarchical clustering
+        hc <- hclust(dist(data_new, method = dm), method = lm)
+        # Check if standard deviation is zero
+        if (sd(cophenetic(hc)) != 0) {
+            # Compute Cophenetic correlation
+            c <- cor(cophenetic(hc), as.dist(dist(data_new, method = dm)))
+            # Print the Cophenetic correlation
+            #cat("Cophenetic correlation for", toupper(dm), "distance and", lm, "linkage is", c, ".\n")
+            # Update highest Cophenetic correlation if necessary
+            if (is.na(high_cophenet_corr) || abs(high_cophenet_corr) < abs(c)) {
+                high_cophenet_corr <- c
+                high_dm_lm[1] <- dm
+                high_dm_lm[2] <- lm
+            }
+        }
+    }
+}
+
+# Print the highest Cophenetic correlation and corresponding parameters
+print(paste("Highest Cophenetic correlation:", high_cophenet_corr))
+print(paste("Corresponding distance metric:", toupper(high_dm_lm[1])))
+print(paste("Corresponding linkage method:", high_dm_lm[2]))
+
+cat(
+  "Highest Cophenetic correlation is ", high_cophenet_corr, 
+  ", which is obtained with ", toupper(high_dm_lm[1]), " distance and ", high_dm_lm[2], " linkage.", 
+  "\n"
+)
+```
+
+Highest Cophenetic correlation is 0.9993348 , which is obtained with MAXIMUM distance and average linkage.
+
+This correlation value indicates a strong relationship between the original pairwise distances and the cophenetic distances.
+
+```{r dendrogram}
+best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
+
+# Color branches of the dendrogram
+best_hc_colored <- color_branches(as.dendrogram(best_hc), k = 5)  # You can adjust the number of colors (k) as needed
+
+# Plot dendrogram
+plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance and average linkage (Colored)")
+```
+
+**How to use dendrogram?**
+
+**(1) Visual Inspection:**
+
+-   **Observe the Overall Structure**: Start by examining the overall structure of the dendrogram. Look for patterns of clustering and the hierarchy of clusters.
+
+-   **Check the Branch Lengths**: Longer branches represent greater dissimilarity between clusters. Pay attention to abrupt changes in branch lengths, which may indicate significant differences between clusters.
+
+-   **Identify Cluster Cuts**: Look for natural breaks or clusters where the dendrogram is cut. These cuts represent the division points where clusters are formed.
+
+**(2) Determining the Number of Clusters:**
+
+-   **Horizontal Cuts**: Imagine drawing a horizontal line across the dendrogram. The number of times this line intersects the vertical lines (branches) indicates the number of clusters.
+
+-   **Natural Breaks**: Identify points in the dendrogram where there are large gaps between branches. These points often correspond to natural breaks in the data and suggest the optimal number of clusters.
+
+**(3) Assessing Cluster Sizes:**
+
+-   **Cluster Size Distribution**: Examine the distribution of cluster sizes by looking at the heights of the dendrogram branches. Ensure that the resulting clusters are of reasonable sizes and not overly skewed.
+
+-   **Balanced Clusters**: Ideally, clusters should have approximately equal numbers of data points, but this may vary depending on the nature of the data and the clustering objectives.
+
+**(4) Identifying Inconsistencies:**
+
+-   **Inconsistent Merging**: Look for instances where clusters are merged at varying distances. Inconsistent merging may indicate suboptimal clustering or noisy data.
+
+-   **Abnormal Patterns**: Watch out for abnormal patterns such as clusters merging and then splitting again shortly afterward. These patterns may suggest errors in the clustering process or the presence of outliers.
+
+**(5) Iterative Refinement:**
+
+-   **Experiment with Parameters**: Adjust clustering parameters such as distance metrics or linkage methods and observe the changes in the dendrogram structure.
+
+-   **Compare Results**: Compare dendrograms generated with different parameter settings to identify the most stable and meaningful clustering solution.
+
+```{r}
+# Perform hierarchical clustering with the chosen parameters
+best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
+
+# Cut the dendrogram to get the clusters
+clusters <- cutree(best_hc, k = 3)  # You can adjust the number of clusters as needed
+
+# Plot the dendrogram with cluster colors
+plot(as.dendrogram(best_hc), main = "Dendrogram with MAXIMUM distance and average linkage (Colored)",
+     xlab = "Observations", ylab = "Height")
+rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
+```
+
+```{r}
+# Perform hierarchical clustering with the chosen parameters
+best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
+
+# Cut the dendrogram to get the clusters
+clusters <- cutree(best_hc, k = 3)  # Set the number of clusters to 3
+
+# Combine the original dataframe with the cluster labels
+data_clusters <- cbind(data_new, cluster = clusters)
+data_clusters
+# Count the number of observations in each cluster
+cluster_counts <- table(clusters)
+
+# Print the number of observations in each cluster
+print("Number of observations in each cluster:")
+print(cluster_counts)
+
+# Cluster profiling: calculate summary statistics for each cluster
+cluster_profiles <- aggregate(data_clusters[, -7], by = list(cluster = clusters), FUN = mean)
+cluster_profiles
+```
+
+3 Clusters:
+
+-   Cluster 1 contains 14 observations: 7, 9, 13, 22, 17, 18, 8, 4, 21, 2, 14, 20, 1, 12
+
+-   Cluster 2 contains 8 observations: 3, 5, 15, 11, 23, 10, 6, 16
+
+-   Cluster 3 contains 1 observation: 19
+
+### **2. Silhouette Coefficient**
+
+The Silhouette Coefficient is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation). Silhouette Coefficient measures the relative distance between a data point and its own cluster versus neighboring clusters, providing insight into the quality and separation of clusters in a dataset.
+
+It ranges from -1 to 1, where a high value indicates that the object is well matched to its own cluster and poorly matched to neighboring clusters.
+
+How to Compute Silhouette Coefficient?
+
+(1) Compute the average distance from a single data point $i$ to all other points in the same cluster. Let this be denoted as $a_i$​.
+
+(2) For each neighboring cluster (clusters other than the cluster $i$ belongs to), compute the average distance from $i$ to all points in that cluster. Let the minimum of these distances be denoted as $b_i$​.
+
+(3) Compute the silhouette coefficient $s_i$​ for data point $i$ using the formula:
+
+$$
+s_i=\frac{b_i - a_i}{max(a_i, b_i)}
+$$
+
+(4) Repeat steps (1)-(3) for all data points.
+
+(5) Finally, compute the overall Silhouette Coefficient as the mean of all $s_i$​ values.
+
+$s_i​$ represents the Silhouette Coefficient for data point $i$, $a_i$​ represents the average distance from $i$ to all other points in the same cluster, and $b_i$​ represents the minimum average distance from $i$ to all points in neighboring clusters.
+
+```{r silhouette}
+library(cluster)
+
+# Compute silhouette scores
+sil_scores <- silhouette(clusters, dist(data_clusters))
+
+# Print silhouette scores
+print("Silhouette Scores for the Clusters:")
+print(sil_scores)
+```
+
+```{r silhouette2}
+library(cluster)
+library(factoextra)
+
+# Fit hierarchical clustering with the chosen parameters
+best_hc <- hclust(dist(data_clusters[, -ncol(data_clusters)]), method = "average")
+clusters <- cutree(best_hc, k = 3)  # Set the number of clusters to 3
+
+# Create a silhouette plot
+silhouette_plot <- fviz_silhouette(
+  silhouette(clusters, dist(data_clusters[, -ncol(data_clusters)])),
+  geom="bar",
+  main="Silhouette Plot for Clusters"
+)
+
+# Show the silhouette plot
+print(silhouette_plot)
+```
+
+The average silhouette width for each cluster provides insights into the quality and separation of the clusters. Here's an observation for each cluster based on the average silhouette width:
+
+1.  **Cluster 1 (14 observations, average silhouette width: 0.82):**
+
+    -   This cluster has a relatively high average silhouette width, indicating that most observations within this cluster are well-matched to their own cluster and poorly matched to neighboring clusters.
+
+    -   The high average silhouette width suggests good separation and cohesion within the cluster, with well-defined boundaries between clusters.
+
+2.  **Cluster 2 (8 observations, average silhouette width: 0.61):**
+
+    -   This cluster has a moderate average silhouette width, indicating that observations within this cluster are somewhat well-matched to their own cluster but may also have some overlap with neighboring clusters.
+
+    -   The moderate average silhouette width suggests moderate separation and cohesion within the cluster, with some instances of misclassification or ambiguity.
+
+3.  **Cluster 3 (1 observation, average silhouette width: 0.00):**
+
+    -   This cluster has an average silhouette width of zero, indicating that the observations within this cluster are equally close to observations in other clusters as they are to observations within their own cluster.
+
+    -   The average silhouette width of zero suggests poor separation and cohesion within the cluster, with no clear distinction between this cluster and other clusters.
+
+## Clusters Despription
+
+Let's summarize the features of each cluster based on the provided cluster profiles:
+
+**Cluster 1:**
+
+-   **Year**: Movies in this cluster were typically released around 1996.
+
+-   **Budget**: The average budget for movies in this cluster is relatively high, around \$93.24 million.
+
+-   **Revenue**: Movies in this cluster tend to have a moderate average revenue of approximately \$26.22 million.
+
+-   **Duration**: The average duration of movies in this cluster is around 102.93 minutes, indicating a moderate length.
+
+-   **Rating**: Movies in this cluster have a decent average rating of about 7.61.
+
+-   **Vote**: The average number of votes for movies in this cluster is about 122.21 thousand.
+
+**Cluster 2:**
+
+-   **Year**: Movies in this cluster were mainly released around 2006.
+
+-   **Budget**: The average budget for movies in this cluster is moderate, approximately \$34.25 million.
+
+-   **Revenue**: Movies in this cluster tend to have a high average revenue, around \$185.47 million.
+
+-   **Duration**: The average duration of movies in this cluster is about 115.75 minutes, indicating a moderate length.
+
+-   **Rating**: Movies in this cluster have a high average rating of about 7.85.
+
+-   **Vote**: The average number of votes for movies in this cluster is significantly higher, around 269.88 thousand.
+
+**Cluster 3:**
+
+-   **Year**: Movies in this cluster were typically released around 1994.
+
+-   **Budget**: The average budget for movies in this cluster is relatively low, around \$12.00 million.
+
+-   **Revenue**: There seems to be an unusually high average revenue value in this cluster, around \$4470.00 million.
+
+-   **Duration**: The average duration of movies in this cluster is about 119.00 minutes, indicating a moderate length.
+
+-   **Rating**: Movies in this cluster have a moderate average rating of about 7.30.
+
+-   **Vote**: The average number of votes for movies in this cluster is relatively low, around 34.00 thousand.
+
+## Insights and Recommendations
+
+Based on the characteristics of each cluster, we can derive some insights and make recommendations:
+
+**Cluster 1:**
+
+-   **Insights**: Movies in this cluster tend to have a relatively high budget but generate moderate revenue. They have a decent rating and receive a moderate number of votes. These movies were typically released around 1996 and have a moderate duration.
+
+-   **Recommendations**:
+
+    -   Explore factors contributing to the gap between budget and revenue. Are there specific genres or marketing strategies that could be optimized?
+
+    -   Consider targeted marketing campaigns to increase viewer engagement and votes, potentially leveraging nostalgia for movies released in the mid-1990s.
+
+**Cluster 2:**
+
+-   **Insights**: Movies in this cluster have a moderate budget but generate high revenue. They also receive a high rating and a significantly higher number of votes compared to other clusters. These movies were mainly released around 2006 and have a moderate duration.
+
+-   **Recommendations**:
+
+    -   Identify successful elements contributing to high revenue and viewer engagement. This could include genres, casting choices, or storytelling techniques that resonate with audiences.
+
+    -   Invest in marketing strategies to capitalize on the high viewer engagement and further boost revenue. Consider leveraging social media and online platforms to reach a wider audience.
+
+**Cluster 3:**
+
+-   **Insights**: Movies in this cluster have a relatively low budget and an unusually high average revenue. They receive a moderate rating and a relatively low number of votes. These movies were typically released around 1994 and have a moderate duration.
+
+-   **Recommendations**:
+
+    -   Investigate the accuracy of the revenue data in this cluster, as the reported value appears to be unusually high. Ensure data integrity and verify the sources of revenue information.
+
+    -   Analyze the factors contributing to moderate ratings and low viewer engagement. Consider strategies to enhance the appeal of these movies to a broader audience, such as targeted marketing or rebranding efforts.
+
+Overall, these insights and recommendations provide a starting point for further analysis and action.
+
+# Strengths, Weaknesses
+
+### Strengths:
+
+1.  **Interpretability**: Divisive clustering produces a hierarchical structure of clusters, making it easier to interpret and understand the relationships between clusters at different levels of granularity. This hierarchical representation can provide insights into the natural grouping of data and the hierarchical organization of clusters.
+
+2.  **Flexibility**: Divisive clustering allows for the exploration of clusters at multiple levels of detail. Analysts can start with a single cluster encompassing all data points and recursively divide it into smaller clusters until reaching the desired level of granularity. This flexibility allows for adaptive clustering based on the characteristics of the data and the analytical objectives.
+
+3.  **Scalability**: Divisive clustering can be more computationally efficient than agglomerative clustering, especially for large datasets. Since divisive clustering starts with a single cluster and recursively divides it into smaller clusters, it can be less computationally intensive than agglomerative clustering, which involves pairwise comparisons and merging of clusters.
+
+4.  **Hierarchy Preservation**: Divisive clustering preserves the hierarchical relationships between clusters throughout the clustering process. This hierarchical structure provides additional context and information about the relationships between clusters, which can be useful for downstream analysis tasks such as visualization, interpretation, and pattern discovery.
+
+5.  **Top-Down Exploration**: Divisive clustering allows analysts to perform top-down exploration of the data, starting with a global view of the entire dataset and progressively refining the clustering structure to reveal finer-grained patterns and relationships. This top-down approach can be beneficial for gaining insights into the hierarchical organization of data and identifying clusters at different levels of abstraction.
+
+### Weaknesses:
+
+1.  **Sensitivity to Initial Conditions**: Divisive clustering heavily relies on the initial selection of clusters, which can affect the final clustering results. Depending on the choice of initial cluster seeds, the algorithm may converge to different solutions, leading to variations in the clustering outcome.
+
+2.  **Computational Complexity**: Divisive clustering can be computationally intensive, especially for large datasets. Since it involves recursively dividing clusters into smaller clusters, the algorithm's complexity increases with the number of data points and the depth of the clustering hierarchy. This can make divisive clustering less scalable for very large datasets compared to other clustering methods.
+
+3.  **Over-Splitting**: Divisive clustering may suffer from over-splitting, where the algorithm continues to divide clusters until each data point forms its own cluster. This can result in excessively fine-grained clusters that may not capture meaningful patterns or relationships in the data. Over-splitting can occur if the algorithm's stopping criterion is not well-defined or if the data lacks clear natural clustering structure.
+
+4.  **Difficulty in Determining the Number of Clusters**: Unlike some other clustering methods that produce a fixed number of clusters as output, divisive clustering generates a hierarchy of clusters, making it challenging to determine the optimal number of clusters. Analysts may need to rely on heuristic approaches or domain knowledge to interpret the clustering hierarchy and select an appropriate level of granularity.
+
+5.  **Interpretability of Deep Hierarchies**: Divisive clustering can produce deep hierarchical structures with multiple levels of nesting, which may be difficult to interpret and visualize. Deep hierarchies may obscure meaningful patterns in the data and make it challenging to extract actionable insights from the clustering results.
+
+6.  **Dependency on Distance Metric**: The choice of distance metric used in divisive clustering can significantly impact the clustering results. Different distance metrics may lead to different clustering outcomes, making it important to carefully select an appropriate distance measure based on the characteristics of the data and the clustering objectives.
+
+Divisive hierarchical clustering, known for its interpretability and flexibility, finds applications in various fields. It's useful in exploratory data analysis for uncovering hidden patterns and structures. Additionally, it aids in taxonomy construction, market segmentation for tailored marketing strategies, image segmentation for object separation, biological data analysis for identifying functional relationships, and document clustering for organizing large document collections.
+
+# References
+
+Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
+
+mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals \<\<\<\<\<\<\< HEAD
+
+Practical Guide to Cluster Analysis in R , ch9, page 84-96, by A. Kassambara
+
+Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
+
+Murtagh, F. (2011). On ultrametricity, data coding, and computation. Journal of Classification, 28(3), 326-347.
+
+R Development Core Team. (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
+
+Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
+
+Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
