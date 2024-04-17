@@ -101,17 +101,14 @@ A basic dendrogram and banner plot can be directly plotted using plot() with the
   plot(hc_euclid)
 ```
 
-Banner plots display the hierarchy of clusters, equivalent to a tree (Rousseeuw (1986) or chapter 6 of Kaufman and Rousseeuw (1990)) where banners plot the diameter of each cluster being split.\
+Banner plots display the hierarchy of clusters, equivalent to a tree (Rousseeuw (1986) or chapter 6 of Kaufman and Rousseeuw (1990)) where banners plot the diameter of each cluster being split.
 
 ```{r}
 cut_clusters <- cutree(hc_euclid, k=4)
-
 print(cut_clusters)
-
 ```
 
 ```{r}
-
 # List of distance metrics
 distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
 
@@ -139,7 +136,7 @@ The most common diagnostic measure in hierarchical clustering is arguably the de
 
 ## RShiny App : Reactive Dendrogram
 
-```{r}
+```{r shiny, echo = T, eval = F, message = F}
 library(shiny)
 library(shinydashboard)
 library(stats)
@@ -220,7 +217,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-```{r}
+```{r shiny2, echo = T, eval = F, message = F}
 library(dendextend)
 library(ggplot2)
 library(plotly)
@@ -293,8 +290,7 @@ Where:
 
 The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
 
-```{r}
-
+```{r cophenetic_cor, echo = T, eval = F, warning=F, message = F}
 # Perform divisive hierarchical clustering and calculate cophenetic metrics
 diana_results <- lapply(distance_metrics, function(distance_metric) {
   
@@ -321,8 +317,6 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
   ))
 })
 
-
-
 # Find the result with the highest cophenetic correlation
 best_index <- which.max(sapply(diana_results, function(result) result$cophenetic_correlation))
 best_result <- diana_results[[best_index]]
@@ -331,22 +325,21 @@ best_distance_metric <- distance_metrics[best_index]
 # Print results (optional)
 cat("Distance metric with highest cophenetic correlation:", best_distance_metric, "\n")
 cat("Cophenetic correlation:", best_result$cophenetic_correlation, "\n")
-
-
 ```
 
 Highest Cophenetic correlation is 0.9986 , which is obtained with MAXIMUM distance.
 
 This correlation value indicates a strong relationship between the original pairwise distances and the cophenetic distances present in the dendrogrammatic representation.
 
-```{r dendrogram}
-best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
+```{r dendrogram1, echo = T, eval = F, warning=F, message = F}
+# Perform divisive hierarchical clustering
+best_hc <- diana(dist(data_new, method = "maximum"))
 
 # Color branches of the dendrogram
 best_hc_colored <- color_branches(as.dendrogram(best_hc), k = 5)  # You can adjust the number of colors (k) as needed
 
 # Plot dendrogram
-plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance and average linkage (Colored)")
+plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance")
 ```
 
 **How to use dendrogram?**
@@ -383,9 +376,9 @@ plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance and average linka
 
 -   **Compare Results**: Compare dendrograms generated with different parameter settings to identify the most stable and meaningful clustering solution.
 
-```{r}
+```{r dendrogram2, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
-best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
+best_hc <- diana(dist(data_new, method = "maximum"))
 
 # Cut the dendrogram to get the clusters
 clusters <- cutree(best_hc, k = 3)  # You can adjust the number of clusters as needed
@@ -396,7 +389,7 @@ plot(as.dendrogram(best_hc), main = "Dendrogram with MAXIMUM distance and averag
 rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
 ```
 
-```{r}
+```{r cluster_profiles, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
 best_hc <- diana(dist(data_new, method = "maximum"))
 
@@ -420,11 +413,102 @@ cluster_profiles
 
 3 Clusters:
 
--   Cluster 1 contains 14 observations: 7, 9, 13, 22, 17, 18, 8, 4, 21, 2, 14, 20, 1, 12
+-   Cluster 1 contains 14 observations: 1, 12, 20, 14, 4, 21, 8, 2, 7, 9, 13, 17, 18, 22
 
--   Cluster 2 contains 8 observations: 3, 5, 15, 11, 23, 10, 6, 16
+-   Cluster 2 contains 8 observations: 3, 5, 11, 23, 15, 6, 10, 16
 
 -   Cluster 3 contains 1 observation: 19
+
+#### Removing outlier
+
+It appears that observation 19 is an outlier as it is the only observation in Cluster 3. From the dendrogram this point significantly differs from the rest of the data, either due to measurement errors or for some other reasons. So we remove this outlier for further analysis.
+
+```{r data_no_outlier, echo = T, eval = F, warning=F, message = F}
+# Remove outlier observation (19)
+data_no_outlier <- data_new[-19, ]
+# Print the dimensions of the new dataframe
+print(dim(data_no_outlier))
+```
+
+```{r cophenetic_cor_no_outlier, echo = T, eval = F, warning=F, message = F}
+# Perform divisive hierarchical clustering and calculate cophenetic metrics
+diana_results <- lapply(distance_metrics, function(distance_metric) {
+  
+  # Compute distance matrix
+  distance_matrix2 <- dist(data_no_outlier, method = distance_metric)
+  
+  # Perform diana() clustering
+  hc2 <- diana(
+    x = distance_matrix2,
+    diss = TRUE,
+    keep.diss = nrow(data_no_outlier) < 100,
+    keep.data = FALSE
+  )
+  
+  # Calculate cophenetic distance and correlation
+  cophenetic_distance2 <- cophenetic(hc2)
+  cophenetic_correlation2 <- cor(cophenetic_distance2, distance_matrix2)
+  
+  # Return a list with clustering object, cophenetic distance, and correlation
+  return(list(
+    hc = hc2,
+    cophenetic_distance = cophenetic_distance2,
+    cophenetic_correlation = cophenetic_correlation2
+  ))
+})
+
+# Find the result with the highest cophenetic correlation
+best_index2 <- which.max(sapply(diana_results, function(result) result$cophenetic_correlation))
+best_result2 <- diana_results[[best_index2]]
+best_distance_metric2 <- distance_metrics[best_index2]
+
+# Print results (optional)
+cat("Distance metric with highest cophenetic correlation:", best_distance_metric2, "\n")
+cat("Cophenetic correlation:", best_result2$cophenetic_correlation, "\n")
+```
+
+```{r dendrogram_no_outlier, echo = T, eval = F, warning=F, message = F}
+# Perform hierarchical clustering with the chosen parameters
+best_hc2 <- diana(dist(data_no_outlier, method = "maximum"))
+
+# Cut the dendrogram to get the clusters
+clusters2 <- cutree(best_hc2, k = 3)  # You can adjust the number of clusters as needed
+
+# Plot the dendrogram with cluster colors
+plot(as.dendrogram(best_hc2), main = "Dendrogram with MAXIMUM distance (without outlier)",
+     xlab = "Observations", ylab = "Height")
+rect.hclust(best_hc2, k = 3, border = 2:8)  # Highlight clusters
+```
+
+```{r cluster_profiles2, echo = T, eval = F, warning=F, message = F}
+# Perform hierarchical clustering with the chosen parameters
+best_hc2 <- diana(dist(data_no_outlier, method = "maximum"))
+
+# Cut the dendrogram to get the clusters
+clusters2 <- cutree(best_hc2, k = 3)  # Set the number of clusters to 3
+
+# Combine the original dataframe with the cluster labels
+data_clusters2 <- cbind(data_no_outlier, cluster = clusters2)
+data_clusters2
+# Count the number of observations in each cluster
+cluster_counts2 <- table(clusters2)
+
+# Print the number of observations in each cluster
+print("Number of observations in each cluster:")
+print(cluster_counts2)
+
+# Cluster profiling: calculate summary statistics for each cluster
+cluster_profiles2 <- aggregate(data_clusters2[, -7], by = list(cluster = clusters2), FUN = mean)
+cluster_profiles2
+```
+
+3 Clusters (without outlier):
+
+-   Cluster 1 contains 14 observations: 1, 12, 20, 14, 4, 21, 8, 2, 7, 9, 13, 17, 18, 22
+
+-   Cluster 2 contains 8 observations: 3, 5, 11, 23, 15, 6
+
+-   Cluster 3 contains 1 observation: 10, 16
 
 ## **II. Silhouette Coefficient**
 
@@ -450,28 +534,25 @@ $$
 
 $s_i​$ represents the Silhouette Coefficient for data point $i$, $a_i$​ represents the average distance from $i$ to all other points in the same cluster, and $b_i$​ represents the minimum average distance from $i$ to all points in neighboring clusters.
 
-```{r silhouette}
+```{r silhouette, warning=F}
 library(cluster)
 
 # Compute silhouette scores
-sil_scores <- silhouette(clusters, dist(data_clusters))
-
-# Print silhouette scores
-print("Silhouette Scores for the Clusters:")
-print(sil_scores)
+sil_scores <- silhouette(clusters2, dist(data_clusters2))
+sil_scores
 ```
 
-```{r silhouette2}
+```{r silhouette_graph, warning=F}
 library(cluster)
 library(factoextra)
 
 # Fit hierarchical clustering with the chosen parameters
-best_hc <- hclust(dist(data_clusters[, -ncol(data_clusters)]), method = "average")
-clusters <- cutree(best_hc, k = 3)  # Set the number of clusters to 3
+best_hc2 <- diana(dist(data_no_outlier, method = "maximum"))
+clusters2 <- cutree(best_hc2, k = 3)  # Set the number of clusters to 3
 
 # Create a silhouette plot
 silhouette_plot <- fviz_silhouette(
-  silhouette(clusters, dist(data_clusters[, -ncol(data_clusters)])),
+  silhouette(clusters2, dist(data_clusters2[, -ncol(data_clusters2)])),
   geom="bar",
   main="Silhouette Plot for Clusters"
 )
@@ -482,107 +563,75 @@ print(silhouette_plot)
 
 The average silhouette width for each cluster provides insights into the quality and separation of the clusters. Here's an observation for each cluster based on the average silhouette width:
 
-1.  **Cluster 1 (14 observations, average silhouette width: 0.82):**
+**(1) Cluster 1 (14 observations, average silhouette width: 0.78):**
 
-    -   This cluster has a relatively high average silhouette width, indicating that most observations within this cluster are well-matched to their own cluster and poorly matched to neighboring clusters.
+-   This cluster exhibits a high average silhouette width, indicating that most observations within this cluster are well-suited to their assigned cluster and less suited to neighboring clusters.
 
-    -   The high average silhouette width suggests good separation and cohesion within the cluster, with well-defined boundaries between clusters.
+-   The elevated average silhouette width implies strong separation and cohesion within the cluster, with distinct boundaries between clusters.
 
-2.  **Cluster 2 (8 observations, average silhouette width: 0.61):**
+**(2) Cluster 2 (6 observations, average silhouette width: 0.59):**
 
-    -   This cluster has a moderate average silhouette width, indicating that observations within this cluster are somewhat well-matched to their own cluster but may also have some overlap with neighboring clusters.
+-   This cluster demonstrates a moderate average silhouette width, suggesting that observations within this cluster are reasonably well-matched to their own cluster but may also share similarities with neighboring clusters.
 
-    -   The moderate average silhouette width suggests moderate separation and cohesion within the cluster, with some instances of misclassification or ambiguity.
+-   The moderate average silhouette width indicates moderate separation and cohesion within the cluster, with some instances of overlap or ambiguity.
 
-3.  **Cluster 3 (1 observation, average silhouette width: 0.00):**
+**(3) Cluster 3 (2 observation, average silhouette width: 0.56):**
 
-    -   This cluster has an average silhouette width of zero, indicating that the observations within this cluster are equally close to observations in other clusters as they are to observations within their own cluster.
+-   This cluster comprises only two observations, and despite its small size, it still manages to achieve a positive average silhouette width of 0.56.
 
-    -   The average silhouette width of zero suggests poor separation and cohesion within the cluster, with no clear distinction between this cluster and other clusters.
+-   This suggests that these two observations are more similar to each other than they are to observations in other clusters.
 
 # Completing Analysis
 
-## Cluster Description 
+```{r cluster description, warning=FALSE}
+cluster_profiles2
+```
+
+## Cluster Description
 
 Let's summarize the features of each cluster based on the provided cluster profiles:
 
 **Cluster 1:**
 
--   **Year**: Movies in this cluster were typically released around 1996.
+-   **Year:** Films in this cluster tend to be from around 1996.57.
 
--   **Budget**: The average budget for movies in this cluster is relatively high, around \$93.24 million.
+-   **Budget:** The average budget for films in this cluster is approximately \$93.24 million.
 
--   **Revenue**: Movies in this cluster tend to have a moderate average revenue of approximately \$26.22 million.
+-   **Revenue:** Films in this cluster typically generate revenue of around \$26,222,059.
 
--   **Duration**: The average duration of movies in this cluster is around 102.93 minutes, indicating a moderate length.
+-   **Duration:** The average duration of films in this cluster is approximately 102.93 minutes.
 
--   **Rating**: Movies in this cluster have a decent average rating of about 7.61.
+-   **Rating:** Films in this cluster have an average rating of about 7.61.
 
--   **Vote**: The average number of votes for movies in this cluster is about 122.21 thousand.
-
-**Cluster 2:**
-
--   **Year**: Movies in this cluster were mainly released around 2006.
-
--   **Budget**: The average budget for movies in this cluster is moderate, approximately \$34.25 million.
-
--   **Revenue**: Movies in this cluster tend to have a high average revenue, around \$185.47 million.
-
--   **Duration**: The average duration of movies in this cluster is about 115.75 minutes, indicating a moderate length.
-
--   **Rating**: Movies in this cluster have a high average rating of about 7.85.
-
--   **Vote**: The average number of votes for movies in this cluster is significantly higher, around 269.88 thousand.
-
-**Cluster 3:**
-
--   **Year**: Movies in this cluster were typically released around 1994.
-
--   **Budget**: The average budget for movies in this cluster is relatively low, around \$12.00 million.
-
--   **Revenue**: There seems to be an unusually high average revenue value in this cluster, around \$4470.00 million.
-
--   **Duration**: The average duration of movies in this cluster is about 119.00 minutes, indicating a moderate length.
-
--   **Rating**: Movies in this cluster have a moderate average rating of about 7.30.
-
--   **Vote**: The average number of votes for movies in this cluster is relatively low, around 34.00 thousand.
-
-## Insights and Recommendations
-
-Based on the characteristics of each cluster, we can derive some insights and make recommendations:
-
-**Cluster 1:**
-
--   **Insights**: Movies in this cluster tend to have a relatively high budget but generate moderate revenue. They have a decent rating and receive a moderate number of votes. These movies were typically released around 1996 and have a moderate duration.
-
--   **Recommendations**:
-
-    -   Explore factors contributing to the gap between budget and revenue. Are there specific genres or marketing strategies that could be optimized?
-
-    -   Consider targeted marketing campaigns to increase viewer engagement and votes, potentially leveraging nostalgia for movies released in the mid-1990s.
+-   **Vote Count:** The average number of votes for films in this cluster is around 122.21 thousand.
 
 **Cluster 2:**
 
--   **Insights**: Movies in this cluster have a moderate budget but generate high revenue. They also receive a high rating and a significantly higher number of votes compared to other clusters. These movies were mainly released around 2006 and have a moderate duration.
+-   **Year:** Films in this cluster are more recent, with an average release year of around 2008.33.
 
--   **Recommendations**:
+-   **Budget:** The average budget for films in this cluster is lower than Cluster 1, at about \$38.50 million.
 
-    -   Identify successful elements contributing to high revenue and viewer engagement. This could include genres, casting choices, or storytelling techniques that resonate with audiences.
+-   **Revenue:** Films in this cluster tend to have higher revenue, averaging around \$162,136,149.
 
-    -   Invest in marketing strategies to capitalize on the high viewer engagement and further boost revenue. Consider leveraging social media and online platforms to reach a wider audience.
+-   **Duration:** The average duration of films in this cluster is approximately 113.67 minutes.
+
+-   **Rating:** Films in this cluster have a slightly higher average rating of about 7.67.
+
+-   **Vote Count:** The average number of votes for films in this cluster is around 144.00 thousand.
 
 **Cluster 3:**
 
--   **Insights**: Movies in this cluster have a relatively low budget and an unusually high average revenue. They receive a moderate rating and a relatively low number of votes. These movies were typically released around 1994 and have a moderate duration.
+-   **Year:** Films in this cluster are from around 2002.50 on average.
 
--   **Recommendations**:
+-   **Budget:** The average budget for films in this cluster is the lowest among the clusters, at approximately \$21.50 million.
 
-    -   Investigate the accuracy of the revenue data in this cluster, as the reported value appears to be unusually high. Ensure data integrity and verify the sources of revenue information.
+-   **Revenue:** Films in this cluster tend to have the highest revenue, averaging around \$255,487,426.
 
-    -   Analyze the factors contributing to moderate ratings and low viewer engagement. Consider strategies to enhance the appeal of these movies to a broader audience, such as targeted marketing or rebranding efforts.
+-   **Duration:** The average duration of films in this cluster is the longest, at about 122.00 minutes.
 
-Overall, these insights and recommendations provide a starting point for further analysis and action.
+-   **Rating:** Films in this cluster have the highest average rating of about 8.40.
+
+-   **Vote Count:** Films in this cluster also have the highest average vote count, at around 647.50 thousand.
 
 # Strengths, Weaknesses
 
@@ -604,30 +653,22 @@ Overall, these insights and recommendations provide a starting point for further
 
 2.  **Computational Complexity**: Divisive clustering can be computationally intensive, especially for large datasets. Since it involves recursively dividing clusters into smaller clusters, the algorithm's complexity increases with the number of data points and the depth of the clustering hierarchy. This can make divisive clustering less scalable for very large datasets compared to other clustering methods.
 
-3.  **Over-Splitting**: Divisive clustering may suffer from over-splitting, where the algorithm continues to divide clusters until each data point forms its own cluster. This can result in excessively fine-grained clusters that may not capture meaningful patterns or relationships in the data. Over-splitting can occur if the algorithm's stopping criterion is not well-defined or if the data lacks clear natural clustering structure.
-
-4.  **Difficulty in Determining the Number of Clusters**: Unlike some other clustering methods that produce a fixed number of clusters as output, divisive clustering generates a hierarchy of clusters, making it challenging to determine the optimal number of clusters. Analysts may need to rely on heuristic approaches or domain knowledge to interpret the clustering hierarchy and select an appropriate level of granularity.
-
-5.  **Interpretability of Deep Hierarchies**: Divisive clustering can produce deep hierarchical structures with multiple levels of nesting, which may be difficult to interpret and visualize. Deep hierarchies may obscure meaningful patterns in the data and make it challenging to extract actionable insights from the clustering results.
-
-6.  **Dependency on Distance Metric**: The choice of distance metric used in divisive clustering can significantly impact the clustering results. Different distance metrics may lead to different clustering outcomes, making it important to carefully select an appropriate distance measure based on the characteristics of the data and the clustering objectives.
-
-Divisive hierarchical clustering, known for its interpretability and flexibility, finds applications in various fields. It's useful in exploratory data analysis for uncovering hidden patterns and structures. Additionally, it aids in taxonomy construction, market segmentation for tailored marketing strategies, image segmentation for object separation, biological data analysis for identifying functional relationships, and document clustering for organizing large document collections.
+3.  **Dependency on Distance Metric**: The choice of distance metric used in divisive clustering can significantly impact the clustering results. Different distance metrics may lead to different clustering outcomes, making it important to carefully select an appropriate distance measure based on the characteristics of the data and the clustering objectives.
 
 # References
 
-Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
+-   Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
 
-mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals \<\<\<\<\<\<\< HEAD
+-   mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals \<\<\<\<\<\<\< HEAD
 
-A. Kassambara, Practical Guide to Cluster Analysis in R , ch9, page 84-96,
+-   A. Kassambara, Practical Guide to Cluster Analysis in R , ch9, page 84-96,
 
-Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
+-   Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
 
-Murtagh, F. (2011). On ultrametricity, data coding, and computation. Journal of Classification, 28(3), 326-347.
+-   Murtagh, F. (2011). On ultrametricity, data coding, and computation. Journal of Classification, 28(3), 326-347.
 
-R Development Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
+-   R Development Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
 
-Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
+-   Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
 
-Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
+-   Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
