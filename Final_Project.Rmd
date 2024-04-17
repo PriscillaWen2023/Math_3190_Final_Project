@@ -23,6 +23,13 @@ Divisive or 'top-down' clustering algorithms have, by the past, been studied les
 
 # Mathematics behind Divisive Hierarchical Clustering
 
+TO-DO:
+
+Cover distance metric formulas for:\
+"euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"
+
+Introduce object known as distance or proximity matrix (show example)
+
 ## **DIANA in R**
 
 The `cluster` library contains the function `diana()`:
@@ -41,7 +48,7 @@ diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
 
 **stand**: A logical value indicating whether to standardize the data before clustering. Defaults to FALSE.
 
-**stop.at.k**: A logical value indicating whether to stop clustering at a specific number of clusters (k). Defaults to FALSE (continues until all data points are in separate clusters). **NOT YET IMPLEMENTED**
+**stop.at.k**: A logical value indicating whether to stop clustering at a specific number of clusters (k). Defaults to FALSE (continues until all data points are in separate clusters). **NOT YET IMPLEMENTED (Instead** we would use something like: `cut_clusters <- cutree( diana_result, k=4)` )
 
 ## Let's try an example!
 
@@ -73,8 +80,10 @@ colnames(data_new) <- col_names
 Here we see the very basic example using classic Euclidean distance:
 
 ```{r basic_euclidean_diana, eval=True, echo=True}
+
 # diana() clustering
-  hc_euclid <- diana(
+  
+hc_euclid <- diana(
     x = dist(data_new, method = 'euclidean'),     # x is a distance matrix
     diss = TRUE,                                  # dist() creates a distance matrix
     keep.diss = nrow(data_new) < 100,             # Control distance matrix storage (optional)
@@ -93,6 +102,13 @@ A basic dendrogram and banner plot can be directly plotted using plot() with the
 ```
 
 Banner plots display the hierarchy of clusters, equivalent to a tree (Rousseeuw (1986) or chapter 6 of Kaufman and Rousseeuw (1990)) where banners plot the diameter of each cluster being split.\
+
+```{r}
+cut_clusters <- cutree(hc_euclid, k=4)
+
+print(cut_clusters)
+
+```
 
 ```{r}
 
@@ -279,48 +295,49 @@ The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where 
 
 ```{r}
 
-# Initialize variables
-high_cophenet_corr <- 0
-high_dm_lm <- c("", "")
-
-# Loop through diana_results (clustering objects)
-for (i in 1:length(diana_results)) {
+# Perform divisive hierarchical clustering and calculate cophenetic metrics
+diana_results <- lapply(distance_metrics, function(distance_metric) {
   
-  hc <- diana_results[[i]]
-  dm <- distance_metrics[i]  # Access corresponding distance metric
+  # Compute distance matrix
+  distance_matrix <- dist(data_new, method = distance_metric)
   
-  # Check if clustering object is valid 
-  if (!is.null(hc)) {
-    
-    # Calculate Cophenetic correlation
-    c <- cor(cophenetic(hc), as.dist(dist(data_new, method = dm)))
-    
-    # Update highest Cophenetic correlation if necessary
-    if (is.na(high_cophenet_corr) || abs(high_cophenet_corr) < abs(c)) {
-      high_cophenet_corr <- c
-      high_dm_lm[1] <- dm
-    }
-    
-    # Calculate Silhouette score
-    # silhouette_score <- silhouette(data_new, hc$cluster)  # Example using cluster labels
-  }
-}
+  # Perform diana() clustering
+  hc <- diana(
+    x = distance_matrix,
+    diss = TRUE,
+    keep.diss = nrow(data_new) < 100,
+    keep.data = FALSE
+  )
+  
+  # Calculate cophenetic distance and correlation
+  cophenetic_distance <- cophenetic(hc)
+  cophenetic_correlation <- cor(cophenetic_distance, distance_matrix)
+  
+  # Return a list with clustering object, cophenetic distance, and correlation
+  return(list(
+    hc = hc,
+    cophenetic_distance = cophenetic_distance,
+    cophenetic_correlation = cophenetic_correlation
+  ))
+})
 
-# Print the highest Cophenetic correlation and corresponding parameters
-print(paste("Highest Cophenetic correlation:", high_cophenet_corr))
-print(paste("Corresponding distance metric:", toupper(high_dm_lm[1])))
 
-cat(
-  "Highest Cophenetic correlation is ", high_cophenet_corr, 
-  ", which is obtained with ", toupper(high_dm_lm[1]), " distance.", 
-  "\n"
-)
+
+# Find the result with the highest cophenetic correlation
+best_index <- which.max(sapply(diana_results, function(result) result$cophenetic_correlation))
+best_result <- diana_results[[best_index]]
+best_distance_metric <- distance_metrics[best_index]
+
+# Print results (optional)
+cat("Distance metric with highest cophenetic correlation:", best_distance_metric, "\n")
+cat("Cophenetic correlation:", best_result$cophenetic_correlation, "\n")
+
 
 ```
 
-Highest Cophenetic correlation is 0.9993348 , which is obtained with MAXIMUM distance and average linkage.
+Highest Cophenetic correlation is 0.9986 , which is obtained with MAXIMUM distance.
 
-This correlation value indicates a strong relationship between the original pairwise distances and the cophenetic distances.
+This correlation value indicates a strong relationship between the original pairwise distances and the cophenetic distances present in the dendrogrammatic representation.
 
 ```{r dendrogram}
 best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
