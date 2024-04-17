@@ -25,6 +25,8 @@ Divisive or 'top-down' clustering algorithms have, by the past, been studied les
 
 ## **DIANA in R**
 
+The `cluster` library contains the function `diana()`:
+
 ```{r function_intro, echo=T}
 diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
       stop.at.k = FALSE,
@@ -80,8 +82,10 @@ Here we see the very basic example using classic Euclidian distance:
   )
   
   print(hc_euclid)
+  print(hc_euclid$diss)
   
   plot(hc_euclid)
+  
   
 ```
 
