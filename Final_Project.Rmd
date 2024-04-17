@@ -13,15 +13,17 @@ urlcolor: blue
 
 # Introduction
 
-Modeling with *unsupervised learning* forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
+Modeling with *unsupervised learning* forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$. This can be conceived at an elementary level as 'analyzing the variance' of $X_{Np}$.
 
-Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
+Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. *Divisive* hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in turn, is a modular description of one part of an emergent hierarchy.
+
+The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps, with $2^{n-1}-1$ possibilities to split the data into two clusters.
 
 ## Background
 
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). They both are subject to some of the same drawbacks:
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Both types of algorithm ***divide a data set into a sequence of nested partitions*** (Gan, 109). They both are also subject to some of the same drawbacks:
 
--   data points which were split at an early phase will not be reallocated
+-   data points which were split at an early phase will not be reallocated later
 -   various dissimilarity measures lead to differing hierarchies
 -   a hierarchy will be established where there is none inherent to the data
 
