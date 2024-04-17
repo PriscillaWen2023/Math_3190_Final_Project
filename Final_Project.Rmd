@@ -41,7 +41,7 @@ diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
 
 **stand**: A logical value indicating whether to standardize the data before clustering. Defaults to FALSE.
 
-**stop.at.k**: A logical value indicating whether to stop clustering at a specific number of clusters (k). Defaults to FALSE (continues until all data points are in separate clusters).
+**stop.at.k**: A logical value indicating whether to stop clustering at a specific number of clusters (k). Defaults to FALSE (continues until all data points are in separate clusters). **NOT YET IMPLEMENTED**
 
 ## Let's try an example!
 
@@ -70,26 +70,29 @@ colnames(data_new) <- col_names
 
 ```
 
-Here we see the very basic example using classic Euclidian distance:
+Here we see the very basic example using classic Euclidean distance:
 
 ```{r basic_euclidean_diana, eval=True, echo=True}
 # diana() clustering
   hc_euclid <- diana(
-    x = dist(data_new, method = 'euclidean'), # x is a distance matrix
+    x = dist(data_new, method = 'euclidean'),     # x is a distance matrix
     diss = TRUE,                                  # dist() creates a distance matrix
     keep.diss = nrow(data_new) < 100,             # Control distance matrix storage (optional)
-    keep.data = FALSE                             # Avoid keeping original data (optional)
+    keep.data = FALSE,                            # Avoid keeping original data (optional)
+    stop.at.k = FALSE                             # non-default is not yet implemented!
   )
   
   print(hc_euclid)
-  print(hc_euclid$diss)
-  
-  plot(hc_euclid)
-  
   
 ```
 
-\
+A basic dendrogram and banner plot can be directly plotted using plot() with the cluster object:
+
+```{r basic_plot_1, eval=T, echo=T}
+  plot(hc_euclid)
+```
+
+Banner plots display the hierarchy of clusters, equivalent to a tree (Rousseeuw (1986) or chapter 6 of Kaufman and Rousseeuw (1990)) where banners plot the diameter of each cluster being split.\
 
 ```{r}
 
@@ -118,7 +121,7 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
 \
 The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
 
-## RShiny App
+## RShiny App : Reactive Dendrogram
 
 ```{r}
 library(shiny)
@@ -227,9 +230,9 @@ clean_data <- apply(data_new, 2, function(column) {
   return(column)
 })
 
-dend <- data_new %>%
-  dist() %>%
-  hclust(method = "ave") %>% # "ave" is default: the average linkage method
+dend <- data_new |> 
+  dist() |> 
+  hclust(method = "ave") |>  # "ave" is default: the average linkage method
   as.dendrogram()
 dend2 <- color_branches(dend, 5)
 
@@ -244,7 +247,7 @@ ggplotly(p)
 
 # Diagnostic and Remedial Measures
 
-## Cophenetic Distance & Correlation
+## I. Cophenetic Distance & Correlation
 
 TO-DO : give explanation/definition of cophenetic distance
 
@@ -378,7 +381,7 @@ rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
 
 ```{r}
 # Perform hierarchical clustering with the chosen parameters
-best_hc <- hclust(dist(data_new, method = "maximum"), method = "average")
+best_hc <- diana(dist(data_new, method = "maximum"))
 
 # Cut the dendrogram to get the clusters
 clusters <- cutree(best_hc, k = 3)  # Set the number of clusters to 3
@@ -406,7 +409,7 @@ cluster_profiles
 
 -   Cluster 3 contains 1 observation: 19
 
-### **2. Silhouette Coefficient**
+## **II. Silhouette Coefficient**
 
 The Silhouette Coefficient is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation). Silhouette Coefficient measures the relative distance between a data point and its own cluster versus neighboring clusters, providing insight into the quality and separation of clusters in a dataset.
 
@@ -480,7 +483,9 @@ The average silhouette width for each cluster provides insights into the quality
 
     -   The average silhouette width of zero suggests poor separation and cohesion within the cluster, with no clear distinction between this cluster and other clusters.
 
-## Cluster Description
+# Completing Analysis
+
+## Cluster Description 
 
 Let's summarize the features of each cluster based on the provided cluster profiles:
 
