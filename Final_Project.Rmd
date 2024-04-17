@@ -148,7 +148,7 @@ ui <- dashboardPage(
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput("distanceType", "Select Distance Type",
-                choices = c("euclidean", "manhattan"), selected = "euclidean"),
+                choices = c("euclidean", "manhattan", "minkowski"), selected = "euclidean"),
     sliderInput("numClusters", "Number of Clusters:", min = 2, max = 10, value = 3),
     actionButton("update", "Update Selection")
   ),
@@ -216,7 +216,6 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
-
 
 # Diagnostic and Remedial Measures
 
@@ -624,9 +623,13 @@ Let's summarize the features of each cluster based on the provided cluster profi
 
 -   Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statistical Learning: Data Mining, Inference, and Prediction. Second Edition. Springer, 2009.
 
--   mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals \<\<\<\<\<\<\< HEAD
+-   Gan, Guojun, Ma, Chaoqun, Wu, Jianhong. Data Clustering: Theory, Algorithms, and Applications, 7. Hierarchical Clustering Techniques. ASA-SIAM, 2007. ISBN: 978-0-89871-623-8.
 
--   A. Kassambara, Practical Guide to Cluster Analysis in R , ch9, page 84-96,
+-   <https://www.rdocumentation.org/packages/cluster/versions/2.1.6/topics/diana>, website.
+
+-   Oudot, Steve. Persistence Theory: From Quiver Representations to Data Analysis, Introduction. AMS, 2015.
+
+-   A. Kassambara, Practical Guide to Cluster Analysis in R , ch. 9, pages 84-96.
 
 -   Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
 
@@ -637,7 +640,6 @@ Let's summarize the features of each cluster based on the provided cluster profi
 -   Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
 
 -   Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
-
 
 ```{r shiny, echo = T, eval = F, message = F}
 library(shiny)
@@ -719,4 +721,3 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
-
