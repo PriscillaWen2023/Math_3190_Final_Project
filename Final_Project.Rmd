@@ -19,7 +19,13 @@ Hierarchical clustering does not require the titular, initializing '$k$' of the 
 
 ## Background
 
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). They both are subject to some of the same drawbacks:
+
+-   data points which were split at an early phase will not be reallocated
+-   various dissimilarity measures lead to differing hierarchies
+-   a hierarchy will be established where there is none inherent to the data
+
+Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
 
 # Mathematics behind Divisive Hierarchical Clustering
 
