@@ -139,18 +139,17 @@ The most common diagnostic measure in hierarchical clustering is arguably the de
 ```{r shiny, echo = T, eval = F, message = F}
 library(shiny)
 library(shinydashboard)
-library(stats)
+library(cluster)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
+  dashboardHeader(title = "Dendrogram Viewer"),
   dashboardSidebar(
-    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    fileInput("dataFile", "Upload dataset", accept = ".csv"),
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput("distanceType", "Select Distance Type",
-                choices = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"), selected = "euclidean"),
-    selectInput("linkageMethod", "Select Linkage Method",
-                choices = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "complete"),
+                choices = c("euclidean", "manhattan"), selected = "euclidean"),
+    sliderInput("numClusters", "Number of Clusters:", min = 2, max = 10, value = 3),
     actionButton("update", "Update Selection")
   ),
   dashboardBody(
@@ -196,8 +195,8 @@ server <- function(input, output, session) {
       return(column)
     })
 
-    dist_matrix <- tryCatch({                      
-      dist(clean_data, method = input$distanceType) #dist() method
+    dist_matrix <- tryCatch({
+      dist(clean_data, method = input$distanceType)
     }, warning = function(w) {
       cat("Warning: ", w$message, "\n")
       return(NULL)
@@ -207,9 +206,10 @@ server <- function(input, output, session) {
     })
 
     if (!is.null(dist_matrix)) {
-      hc <- hclust(dist_matrix, method = input$linkageMethod) 
-      #this is specifically for agglomerative
-      plot(hc, main = "Dendrogram of Agglomerative Hierarchical Clustering")
+      diana_clust <- diana(dist_matrix)
+      clusters <- cutree(diana_clust, k = input$numClusters)
+      plot(diana_clust, labels = clusters, main = "Dendrogram of Divisive Hierarchical Clustering")
+      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:6)
     }
   })
 }
@@ -217,46 +217,6 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-```{r shiny2, echo = T, eval = F, message = F}
-library(dendextend)
-library(ggplot2)
-library(plotly)
-library(shiny)
-library(factoextra)
-library(cluster)
-library(stats)
-
-data = read.csv("Studio Ghibli [TEST].csv", header = TRUE, row.names = 1)
-
-data_new <- na.omit(data)
-data_new <- data_new[c("Year", "Budget", "Revenue", "Duration")]
-col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes")
-data_new <- setNames(data_new, col_names)
-# data_new <- matrix(data_new)
-
-data_new
-
-clean_data <- apply(data_new, 2, function(column) {
-  if(any(is.na(column))) {
-    column[is.na(column)] <- mean(column, na.rm = TRUE)
-  }
-  return(column)
-})
-
-dend <- data_new |> 
-  dist() |> 
-  hclust(method = "ave") |>  # "ave" is default: the average linkage method
-  as.dendrogram()
-dend2 <- color_branches(dend, 5)
-
-p <- ggplot(dend2, horiz = T, offset_labels = -3)
-ggplotly(p)
-
-
-
-# data_new
-# write.csv(data_new, "Studio Ghiblie [TEST2].csv")
-```
 
 # Diagnostic and Remedial Measures
 
@@ -672,3 +632,86 @@ Let's summarize the features of each cluster based on the provided cluster profi
 -   Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
 
 -   Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
+
+
+```{r shiny, echo = T, eval = F, message = F}
+library(shiny)
+library(shinydashboard)
+library(stats)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
+  dashboardSidebar(
+    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    selectInput("numColumns", "Select numeric columns for clustering",
+                choices = NULL, selected = NULL, multiple = TRUE),
+    selectInput("distanceType", "Select Distance Type",
+                choices = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"), selected = "euclidean"),
+    selectInput("linkageMethod", "Select Linkage Method",
+                choices = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"), selected = "complete"),
+    actionButton("update", "Update Selection")
+  ),
+  dashboardBody(
+    plotOutput("dendrogramPlot"),
+    verbatimTextOutput("fileInfo")
+  )
+)
+
+server <- function(input, output, session) {
+  data <- reactive({
+    inFile <- input$dataFile
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    read.csv(inFile$datapath, na.strings = c("NA", "na", ""))
+  })
+  
+  observe({
+    df <- data()
+    updateSelectInput(session, "numColumns", choices = names(df)[sapply(df, is.numeric)])
+  })
+
+  output$fileInfo <- renderPrint({
+    df <- data()
+    if (is.null(df)) {
+      "No file uploaded."
+    } else {
+      summary(df)
+    }
+  })
+
+  output$dendrogramPlot <- renderPlot({
+    req(input$update)
+    df <- data()
+    if (is.null(df) || is.null(input$numColumns)) {
+      return()
+    }
+    clean_data <- df[, input$numColumns]
+    clean_data <- apply(clean_data, 2, function(column) {
+      if (any(is.na(column))) {
+        column[is.na(column)] <- mean(column, na.rm = TRUE)
+      }
+      return(column)
+    })
+
+    dist_matrix <- tryCatch({                      
+      dist(clean_data, method = input$distanceType) #dist() method
+    }, warning = function(w) {
+      cat("Warning: ", w$message, "\n")
+      return(NULL)
+    }, error = function(e) {
+      cat("Error: ", e$message, "\n")
+      return(NULL)
+    })
+
+    if (!is.null(dist_matrix)) {
+      hc <- hclust(dist_matrix, method = input$linkageMethod) 
+      #this is specifically for agglomerative
+      plot(hc, main = "Dendrogram of Agglomerative Hierarchical Clustering")
+    }
+  })
+}
+
+shinyApp(ui, server)
+```
+
