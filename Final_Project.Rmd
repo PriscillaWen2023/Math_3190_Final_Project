@@ -129,7 +129,7 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
 # diana_results will be a list containing clustering objects (hc) for each distance metric
 ```
 
-### **Dendrogram:**
+# **Dendrogram**
 
 \
 The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
@@ -251,6 +251,8 @@ Where:
 The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
 
 ```{r cophenetic_cor, echo = T, eval = F, warning=F, message = F}
+
+
 # Perform divisive hierarchical clustering and calculate cophenetic metrics
 diana_results <- lapply(distance_metrics, function(distance_metric) {
   
@@ -278,7 +280,7 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
 })
 
 # Find the result with the highest cophenetic correlation
-best_index <- which.max(sapply(diana_results, function(result) result$cophenetic_correlation))
+best_index <- which.max( sapply(diana_results, function(result) result$cophenetic_correlation))
 best_result <- diana_results[[best_index]]
 best_distance_metric <- distance_metrics[best_index]
 
@@ -341,7 +343,8 @@ plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance")
 best_hc <- diana(dist(data_new, method = "maximum"))
 
 # Cut the dendrogram to get the clusters
-clusters <- cutree(best_hc, k = 3)  # You can adjust the number of clusters as needed
+clusters <- cutree(best_hc, k = 3)  
+# You can adjust the number of clusters as needed, here we use 3
 
 # Plot the dendrogram with cluster colors
 plot(as.dendrogram(best_hc), main = "Dendrogram with MAXIMUM distance and average linkage (Colored)",
@@ -350,15 +353,14 @@ rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
 ```
 
 ```{r cluster_profiles, echo = T, eval = F, warning=F, message = F}
-# Perform hierarchical clustering with the chosen parameters
-best_hc <- diana(dist(data_new, method = "maximum"))
 
-# Cut the dendrogram to get the clusters
-clusters <- cutree(best_hc, k = 3)  # Set the number of clusters to 3
+# Cut the dendrogram to get a restricted number clusters
+clusters <- cutree(best_hc, k = 3)  # Using 3 clusters
 
 # Combine the original dataframe with the cluster labels
 data_clusters <- cbind(data_new, cluster = clusters)
 data_clusters
+
 # Count the number of observations in each cluster
 cluster_counts <- table(clusters)
 
@@ -381,7 +383,7 @@ cluster_profiles
 
 #### Removing outlier
 
-It appears that observation 19 is an outlier as it is the only observation in Cluster 3. From the dendrogram this point significantly differs from the rest of the data, either due to measurement errors or for some other reasons. So we remove this outlier for further analysis.
+It appears that observation 19 is an outlier as it is the only observation in Cluster 3. From the dendrogram this point significantly differs from the rest of the data, either due to measurement errors or for some other reasons. Noting this, we remove this outlier for further analysis.
 
 ```{r data_no_outlier, echo = T, eval = F, warning=F, message = F}
 # Remove outlier observation (19)
@@ -392,6 +394,7 @@ print(dim(data_no_outlier))
 
 ```{r cophenetic_cor_no_outlier, echo = T, eval = F, warning=F, message = F}
 # Perform divisive hierarchical clustering and calculate cophenetic metrics
+
 diana_results <- lapply(distance_metrics, function(distance_metric) {
   
   # Compute distance matrix
@@ -419,7 +422,9 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
 
 # Find the result with the highest cophenetic correlation
 best_index2 <- which.max(sapply(diana_results, function(result) result$cophenetic_correlation))
+
 best_result2 <- diana_results[[best_index2]]
+
 best_distance_metric2 <- distance_metrics[best_index2]
 
 # Print results (optional)
