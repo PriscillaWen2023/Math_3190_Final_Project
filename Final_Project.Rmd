@@ -3,6 +3,7 @@ title: "Final_Project"
 author: "Cameron Chambers, Bram Stults, Priscilla Wen"
 date: "2024-04-02"
 output: html_document
+#output: beamer_presentation
 header-includes:
    - \usepackage{multirow}
 editor_options: 
@@ -12,23 +13,106 @@ urlcolor: blue
 
 # Introduction
 
-Unsupervised learning is modeling practice which forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
-
-\<\<\<\<\<\<\< HEAD Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
-
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
+Modeling with *unsupervised learning* forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (page *xi*, Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$.
 
 Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. Rather, hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in its turn, is a modular description of one part of an emergent hierarchy. The totality of data as a single cluster composed of $n$-objects is gradually split at each lower level into smaller clusters, with each cluster's internal dissimilarity being reduced. The final hierarchy establishes each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps with $2^{n-1}-1$ possibilities to split the data into two clusters.
 
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
-
 ## Background
 
-//Discuss background of our project here
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters. This is commonly known by its moniker 'DIANA' in the field data analytics.
 
 # Mathematics behind Divisive Hierarchical Clustering
 
-# Analysis on our Dataset
+## **DIANA in R**
+
+```{r function_intro, echo=T}
+diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
+      stop.at.k = FALSE,
+      keep.diss = n < 100, keep.data = !diss, trace.lev = 0)
+```
+
+**x**: the main argument, representing the data matrix or distance matrix used for clustering.
+
+**diss**: A logical value indicating if x already contains a distance matrix. Defaults to TRUE if x inherits from the "dist" class.
+
+**metric**: The distance metric used for calculating distances between data points. Defaults to "euclidean" (Euclidean distance).
+
+**stand**: A logical value indicating whether to standardize the data before clustering. Defaults to FALSE.
+
+**stop.at.k**: A logical value indicating whether to stop clustering at a specific number of clusters (k). Defaults to FALSE (continues until all data points are in separate clusters).
+
+## Let's try an example!
+
+A data set containing a rubric of information about the films of Studio Ghibli... this studio famously deploys little-to-no marketing campaigns in the distribution of its films, relying on the excitement and interest of audiences.
+
+```{r dataset_intro, message=FALSE, eval=T, echo=T}
+library(dendextend)
+library(ggplot2)
+library(plotly)
+library(factoextra)
+library(cluster)
+library(stats)
+library(kableExtra)
+
+# Read the Studio Ghibli dataset from URL
+url <- "https://raw.githubusercontent.com/cham24/Math_3190_Final_Project/main/Studio%20Ghibli%20%5Bwith%20rating%5D.csv"
+data <- read.csv(url, header = TRUE)
+
+# Remove rows with missing values and select specific columns
+data_new <- na.omit(data)
+data_new <- data_new[c("Year", "Budget", "Revenue", "Duration", "Rating.based.on.10.", "Vote..in.kilo.")]
+
+# Rename columns
+col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes", "Rating", "Vote_in_kilo")
+colnames(data_new) <- col_names
+
+```
+
+Here we see the very basic example using classic Euclidian distance:
+
+```{r basic_euclidean_diana, eval=True, echo=True}
+# diana() clustering
+  hc_euclid <- diana(
+    x = dist(data_new, method = 'euclidean'), # x is a distance matrix
+    diss = TRUE,                                  # dist() creates a distance matrix
+    keep.diss = nrow(data_new) < 100,             # Control distance matrix storage (optional)
+    keep.data = FALSE                             # Avoid keeping original data (optional)
+  )
+  
+  print(hc_euclid)
+  
+  plot(hc_euclid)
+  
+```
+
+\
+
+```{r}
+
+# List of distance metrics
+distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
+
+#  divisive hierarchical clustering for each distance metric
+diana_results <- lapply(distance_metrics, function(distance_metric) {
+  
+  # diana() clustering
+  hc <- diana(
+    x = dist(data_new, method = distance_metric), # x is a distance matrix
+    diss = TRUE,                                  # dist() creates a distance matrix
+    keep.diss = nrow(data_new) < 100,             # Control distance matrix storage (optional)
+    keep.data = FALSE                             # Avoid keeping original data (optional)
+  )
+  
+  return(hc)
+})
+
+# diana_results will be a list containing clustering objects (hc) for each distance metric
+```
+
+### **Dendrogram:**
+
+\
+The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
 
 ## RShiny App
 
@@ -92,8 +176,8 @@ server <- function(input, output, session) {
       return(column)
     })
 
-    dist_matrix <- tryCatch({
-      dist(clean_data, method = input$distanceType)
+    dist_matrix <- tryCatch({                      
+      dist(clean_data, method = input$distanceType) #dist() method
     }, warning = function(w) {
       cat("Warning: ", w$message, "\n")
       return(NULL)
@@ -103,8 +187,9 @@ server <- function(input, output, session) {
     })
 
     if (!is.null(dist_matrix)) {
-      hc <- hclust(dist_matrix, method = input$linkageMethod)
-      plot(hc, main = "Dendrogram of Hierarchical Clustering")
+      hc <- hclust(dist_matrix, method = input$linkageMethod) 
+      #this is specifically for agglomerative
+      plot(hc, main = "Dendrogram of Agglomerative Hierarchical Clustering")
     }
   })
 }
@@ -140,7 +225,7 @@ clean_data <- apply(data_new, 2, function(column) {
 
 dend <- data_new %>%
   dist() %>%
-  hclust(method = "ave") %>%
+  hclust(method = "ave") %>% # "ave" is default: the average linkage method
   as.dendrogram()
 dend2 <- color_branches(dend, 5)
 
@@ -155,22 +240,17 @@ ggplotly(p)
 
 # Diagnostic and Remedial Measures
 
-### **1. Dendrogram:**
+## Cophenetic Distance & Correlation
 
-\
-The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
+TO-DO : give explanation/definition of cophenetic distance
 
-**How to compute cophenetic correlation?**
-
-Cophenetic correlation is a measure of how well a dendrogram preserves the pairwise distances between data points. It assesses the fidelity of a hierarchical clustering solution by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points.
+***Cophenetic correlation*** is a statistic representing how well a dendrogram preserves the pairwise distances between data points. It assesses the fidelity of a hierarchical clustering solution by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points.
 
 **(1) Compute the Original Pairwise Distances**: Start by calculating the pairwise distances between all data points in the original dataset using an appropriate distance metric (e.g., Euclidean distance, Manhattan distance, etc.).
 
-**(2) Perform Hierarchical Clustering**: Apply hierarchical clustering to the dataset using a chosen linkage method and distance metric. This results in a dendrogram representing the hierarchical clustering structure.
+**(2) Compute Cophenetic Distances**: For each pair of data points, calculate the cophenetic distance, which is the height at which the two points are first merged into the same cluster in the dendrogram.
 
-**(3) Compute Cophenetic Distances**: For each pair of data points, calculate the cophenetic distance, which is the height at which the two points are first merged into the same cluster in the dendrogram.
-
-**(4) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances. This correlation coefficient is the cophenetic correlation.
+**(3) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances. This correlation coefficient is the cophenetic correlation.
 
 Mathematically, the cophenetic correlation $c$ is computed using the following formula:
 
@@ -188,73 +268,47 @@ Where:
 
 -   The summations are over all pairs of data points $i$ and $j$ with $i$ \< $j$.
 
-(5) **Interpretation**: The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
-
-```{r message=FALSE}
-library(dendextend)
-library(ggplot2)
-library(plotly)
-library(factoextra)
-library(cluster)
-library(stats)
-
-# Read the Studio Ghibli dataset from URL
-url <- "https://raw.githubusercontent.com/cham24/Math_3190_Final_Project/main/Studio%20Ghibli%20%5Bwith%20rating%5D.csv"
-data <- read.csv(url, header = TRUE)
-
-# Remove rows with missing values and select specific columns
-data_new <- na.omit(data)
-data_new <- data_new[c("Year", "Budget", "Revenue", "Duration", "Rating.based.on.10.", "Vote..in.kilo.")]
-
-# Rename columns
-col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes", "Rating", "Vote_in_kilo")
-colnames(data_new) <- col_names
-```
+The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
 
 ```{r}
-library(cluster)
 
-# List of distance metrics
-distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
-
-# List of linkage methods
-linkage_methods <- c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid")
-
-# Initialize variables to store highest Cophenetic correlation and corresponding parameters
+# Initialize variables
 high_cophenet_corr <- 0
 high_dm_lm <- c("", "")
 
-# Compute Cophenetic correlations for each combination of distance metric and linkage method
-for (dm in distance_metrics) {
-    for (lm in linkage_methods) {
-        # Perform hierarchical clustering
-        hc <- hclust(dist(data_new, method = dm), method = lm)
-        # Check if standard deviation is zero
-        if (sd(cophenetic(hc)) != 0) {
-            # Compute Cophenetic correlation
-            c <- cor(cophenetic(hc), as.dist(dist(data_new, method = dm)))
-            # Print the Cophenetic correlation
-            #cat("Cophenetic correlation for", toupper(dm), "distance and", lm, "linkage is", c, ".\n")
-            # Update highest Cophenetic correlation if necessary
-            if (is.na(high_cophenet_corr) || abs(high_cophenet_corr) < abs(c)) {
-                high_cophenet_corr <- c
-                high_dm_lm[1] <- dm
-                high_dm_lm[2] <- lm
-            }
-        }
+# Loop through diana_results (clustering objects)
+for (i in 1:length(diana_results)) {
+  
+  hc <- diana_results[[i]]
+  dm <- distance_metrics[i]  # Access corresponding distance metric
+  
+  # Check if clustering object is valid 
+  if (!is.null(hc)) {
+    
+    # Calculate Cophenetic correlation
+    c <- cor(cophenetic(hc), as.dist(dist(data_new, method = dm)))
+    
+    # Update highest Cophenetic correlation if necessary
+    if (is.na(high_cophenet_corr) || abs(high_cophenet_corr) < abs(c)) {
+      high_cophenet_corr <- c
+      high_dm_lm[1] <- dm
     }
+    
+    # Calculate Silhouette score
+    # silhouette_score <- silhouette(data_new, hc$cluster)  # Example using cluster labels
+  }
 }
 
 # Print the highest Cophenetic correlation and corresponding parameters
 print(paste("Highest Cophenetic correlation:", high_cophenet_corr))
 print(paste("Corresponding distance metric:", toupper(high_dm_lm[1])))
-print(paste("Corresponding linkage method:", high_dm_lm[2]))
 
 cat(
-  "Highest Cophenetic correlation is ", high_cophenet_corr, 
-  ", which is obtained with ", toupper(high_dm_lm[1]), " distance and ", high_dm_lm[2], " linkage.", 
+  "Highest Cophenetic correlation is ", high_cophenet_corr, 
+  ", which is obtained with ", toupper(high_dm_lm[1]), " distance.", 
   "\n"
 )
+
 ```
 
 Highest Cophenetic correlation is 0.9993348 , which is obtained with MAXIMUM distance and average linkage.
@@ -422,7 +476,7 @@ The average silhouette width for each cluster provides insights into the quality
 
     -   The average silhouette width of zero suggests poor separation and cohesion within the cluster, with no clear distinction between this cluster and other clusters.
 
-## Clusters Despription
+## Cluster Description
 
 Let's summarize the features of each cluster based on the provided cluster profiles:
 
@@ -540,13 +594,13 @@ Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. The Elements of Statisti
 
 mitran-lab.amath.nuc.edu/courses/MATH590/biblio/Clustering.ch7.HierarchicalClustering.pdf, SIAM Online Journals \<\<\<\<\<\<\< HEAD
 
-Practical Guide to Cluster Analysis in R , ch9, page 84-96, by A. Kassambara
+A. Kassambara, Practical Guide to Cluster Analysis in R , ch9, page 84-96,
 
 Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
 
 Murtagh, F. (2011). On ultrametricity, data coding, and computation. Journal of Classification, 28(3), 326-347.
 
-R Development Core Team. (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
+R Development Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
 
 Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
 
