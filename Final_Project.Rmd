@@ -17,18 +17,6 @@ Modeling with *unsupervised learning* forgoes the precise prediction of a measur
 
 Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. *Divisive* hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in turn, is a modular description of one part of an emergent hierarchy.
 
-## Background
-
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Both types of algorithm ***divide a data set into a sequence of nested partitions*** (Gan, 109). They both are also subject to some of the same drawbacks:
-
--   data points which were split at an early phase will not be reallocated later
--   various dissimilarity measures lead to differing hierarchies
--   a hierarchy will be established where there is none inherent to the data
-
-Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters, allowing for user specification. This is commonly known by its moniker 'DIANA' in the field data analytics.
-
-The totality of data, a single cluster composed of $n$-objects, is gradually split at each lower level into smaller clusters. Each cluster's "internal" dissimilarity diminishes, while the total number of clusters increases, following some criteria. A final hierarchy partition each individual observation isolated in its own 'cluster' at the lowest level, entirely 'similar' to itself. This 'divisive' hierarchy then is formed in $n-1$ steps, with $2^{n-1}-1$ possibilities to split the data into two clusters.
-
 #### **Visual Data Example**
 
 ![*Set of planar points, structured along different scales*](A-B_planar_point_set.jpg)
@@ -39,7 +27,31 @@ An example given by Steve Oudot concerning the problem of the scale of data: thi
 
 Each visual point in the image occupies its own cluster at the lowest scale (from about 0 to 5), each $B$ is a cluster at the middle level, and the final level above the last merge is the entire $A$ (in the divisive context, one might suppose the first split represents the two halves or legs of the $A$). The hierarchy of scale, or of some innate linear hierarchy, is well represented by hierarchical clustering.
 
-# Mathematics behind Divisive Hierarchical Clustering
+## Background
+
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Both types of algorithm ***divide a data set into a sequence of nested partitions*** (Gan, 109). They both are also subject to some of the same drawbacks:
+
+-   data points which were split at an early phase will not be reallocated later
+-   various dissimilarity measures lead to differing hierarchies
+-   a hierarchy may be established where there is none inherent to the data
+
+Yet a major forthcoming advantage of divisive hierarchical methods is that they may be parametrized to partition the data into a restricted number of clusters, allowing for user specification. There are two general types of divisive methods:
+
+(1) A monothetic method splits data based on the presence absence of a specified attribute
+
+(2) A polythetic method splits data based on the values of all (many) attributes.
+
+Moreover, divisive hierarchical clustering is *monotone*. At each level (depending on the definition of said 'level'), the subclusters being formed must have a smaller level than the parent cluster.
+
+The totality of data, a single cluster composed of $n$-objects, is gradually split at each lower level into smaller clusters. Each cluster's "internal" dissimilarity diminishes, while the total number of clusters increases, following some criteria. A final hierarchy partitions each individual observation in its own, isolated 'cluster' at the lowest level, entirely 'similar' to itself. This divisive hierarchy then is formed in $n-1$ (potential) steps, with $2^{|n|-1}-1$ non-trivial possibilities to split data into two, a very large number of possible partitions. It would seem that finding an 'optimal' bipartition is NP-hard (Gan, 2007).
+
+# DIANA - Divisive Hierarchical Clustering
+
+Commonly known by its moniker 'DIANA' in the field data analytics, this popular divisive hierarchical cluster algorithm proceeds in such a manner: a series of successive splits operated over the cluster of maximal diameter at each given step. This continues until step $n-1$ at which each observation or object is its own cluster, but also allows for a $k$ number of clusters to be specified at which to stop clustering.
+
+In DIANA, cluster diameter is defined as the largest dissimilarity between any of two objects in that cluster. Let $C$ be a cluster of data (even the 'total' cluster of a given data set). The diameter of $C$ is obtained from: $$
+diam(C)=\max_{\textbf{x,y}\in C}d(\textbf{x, y})
+$$ where $d$ is a specified distance function. The diameter is further used to represent dendrogrammatic 'heights', the change in internal dissimilarity among clusters.
 
 TO-DO:
 
@@ -658,6 +670,8 @@ Let's summarize the features of each cluster based on the provided cluster profi
 -   Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. Journal of Computational and Applied Mathematics, 20, 53-65.
 
 -   Tibshirani, R., Walther, G., & Hastie, T. (2001). Estimating the number of clusters in a data set via the gap statistic. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 63(2), 411-423.
+
+#### Footnote: Agglomerative Clustering R Shiny App
 
 ```{r shiny, echo = T, eval = F, message = F}
 library(shiny)
