@@ -51,7 +51,18 @@ Commonly known by its moniker 'DIANA' in the field data analytics, this popular 
 
 In DIANA, cluster diameter is defined as the largest dissimilarity between any of two objects in that cluster. Let $C$ be a cluster of data (even the 'total' cluster of a given data set). The diameter of $C$ is obtained from: $$
 diam(C)=\max_{\textbf{x,y}\in C}d(\textbf{x, y})
-$$ where $d$ is a specified distance function. The diameter is further used to represent dendrogrammatic 'heights', the change in internal dissimilarity among clusters.
+$$ where $d$ is a specified distance function. (The diameter is further used to represent dendrogrammatic 'heights', the change in internal dissimilarity among clusters.).
+
+Let $A$ and $B$ be the clusters split from $C$, where $A\cup B=C$ and $A \cap B = \emptyset$. DIANA is initialized by letting $A=C$ and $B = \{\}$. The algorithm iteratively 'chisels' $A$ and forms $B$: removing points from $A$ and adding them to $B$ from the cluster $C$ with the greatest internal dissimilarity (diameter), with $C\geq 2$. The first iteration identifies a point $\textbf{y}_1$ if it maximizes:\
+\$\$
+
+$$
+D(\textbf{x}, A\setminus\{\textbf{x}\}) = \dfrac{1}{|A-1|} \sum_{\textbf{y}\in A, \textbf{y} \neq \textbf{
+$$
+
+$$
+
+$$
 
 TO-DO:
 
