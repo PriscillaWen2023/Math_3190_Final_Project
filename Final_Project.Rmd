@@ -75,7 +75,7 @@ Introduce object known as distance or proximity matrix (show example)
 
 The `cluster` library contains the function `diana()`:
 
-```{r function_intro, echo=T}
+```{r function_intro, echo=T, eval=F}
 diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
       stop.at.k = FALSE,
       keep.diss = n < 100, keep.data = !diss, trace.lev = 0)
@@ -131,8 +131,6 @@ hc_euclid <- diana(
     keep.data = FALSE,                            # Avoid keeping original data (optional)
     stop.at.k = FALSE                             # non-default is not yet implemented!
   )
-  
-  #print(hc_euclid)
 
 ```
 
@@ -328,7 +326,7 @@ cat("Cophenetic correlation:", best_result$cophenetic_correlation, "\n")
 
 ```
 
-Highest Cophenetic correlation is 0.9986 , which is obtained with MAXIMUM distance.
+Highest Cophenetic correlation is $0.8676$ , which is obtained with MAXIMUM distance.
 
 This correlation value indicates a strong relationship between the original pairwise distances and the cophenetic distances present in the dendrogrammatic representation.
 
