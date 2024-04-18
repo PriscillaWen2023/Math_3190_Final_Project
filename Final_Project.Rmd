@@ -53,16 +53,24 @@ In DIANA, cluster diameter is defined as the largest dissimilarity between any o
 diam(C)=\max_{\textbf{x,y}\in C}d(\textbf{x, y})
 $$ where $d$ is a specified distance function. (The diameter is further used to represent dendrogrammatic 'heights', the change in internal dissimilarity among clusters.).
 
-Let $A$ and $B$ be the clusters split from $C$, where $A\cup B=C$ and $A \cap B = \emptyset$. DIANA is initialized by letting $A=C$ and $B = \{\}$. The algorithm iteratively 'chisels' $A$ and forms $B$: removing points from $A$ and adding them to $B$ from the cluster $C$ with the greatest internal dissimilarity (diameter), with $C\geq 2$. The first iteration identifies a point $\textbf{y}_1$ if it maximizes:\
-\$\$
+Let $A$ and $B$ be the clusters split from $C$, where $A\cup B=C$ and $A \cap B = \emptyset$. DIANA is initialized by letting $A=C$ and $B = \{\}$. The algorithm iteratively 'chisels' $A$ and forms $B$: removing points from $A$ and adding them to $B$ from the cluster $C$ with the greatest internal dissimilarity (diameter), with $C\geq 2$. The first iteration identifies a point $\textbf{y}_1$ if it maximizes :\
 
 $$
-D(\textbf{x}, A\setminus\{\textbf{x}\}) = \dfrac{1}{|A-1|} \sum_{\textbf{y}\in A, \textbf{y} \neq \textbf{
+D(\textbf{x}, A\setminus\{\textbf{x}\}) = \dfrac{1}{|A-1|} \sum_{\textbf{y}\in A, \textbf{y} \neq \textbf{x}}{d(\textbf{x}, \textbf{y})}
 $$
 
-\$\$
+Where $d$ is a specified measure of distance and where vectors $\textbf{x}$ and $\textbf{y}$ are either samples (their components are the measure for each feature) or features (their components are the expression of each feature in each sample). Common distance measures include:
 
-\$\$
+\
+- *Euclidean:* square distance between two vectors (2-norm)
+
+*-Maximum:* maximum distance between two components of $\textbf{x}$ and $\textbf{y}$ (supremum norm)
+
+\-*Manhattan* or "Taxi": absolute distance across features between two vectors (1-norm)
+
+\-*Minkowski: the* $p$-norm, that is the $p^{th}$ root of the sum of the $p^{th}$ powers of the differences of the components
+
+\-*Canberra:* essentially the *Manhattan* distance normalized by sum:$\sum{(|x_i-y_i|/|x_i+y_i|)}$ , where zero-terms are omitted from the summation. It can be more sensitive to small differences than the *Manhattan* distance.
 
 TO-DO:
 
