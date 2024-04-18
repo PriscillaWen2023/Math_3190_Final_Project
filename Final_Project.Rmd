@@ -60,9 +60,9 @@ $$
 D(\textbf{x}, A\setminus\{\textbf{x}\}) = \dfrac{1}{|A-1|} \sum_{\textbf{y}\in A, \textbf{y} \neq \textbf{
 $$
 
-$$
+\$\$
 
-$$
+\$\$
 
 TO-DO:
 
@@ -147,27 +147,6 @@ Banner plots display the hierarchy of clusters, equivalent to a tree (Rousseeuw 
 ```{r}
 cut_clusters <- cutree(hc_euclid, k=4)
 print(cut_clusters)
-```
-
-```{r}
-# List of distance metrics
-distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
-
-#  divisive hierarchical clustering for each distance metric
-diana_results <- lapply(distance_metrics, function(distance_metric) {
-  
-  # diana() clustering
-  hc <- diana(
-    x = dist(data_new, method = distance_metric), # x is a distance matrix
-    diss = TRUE,                                  # dist() creates a distance matrix
-    keep.diss = nrow(data_new) < 100,             # Control distance matrix storage (optional)
-    keep.data = FALSE                             # Avoid keeping original data (optional)
-  )
-  
-  return(hc)
-})
-
-# diana_results will be a list containing clustering objects (hc) for each distance metric
 ```
 
 # **Dendrogram**
@@ -308,8 +287,8 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
   )
   
   # Calculate cophenetic distance and correlation
-  cophenetic_distance <- cophenetic(hc)
-  cophenetic_correlation <- cor(cophenetic_distance, distance_matrix)
+  cophenetic_distance <- cophenetic(as.hclust(hc))
+  cophenetic_correlation <- cor(distance_matrix, cophenetic_distance)
   
   # Return a list with clustering object, cophenetic distance, and correlation
   return(list(
@@ -335,13 +314,13 @@ This correlation value indicates a strong relationship between the original pair
 
 ```{r dendrogram1, echo = T, eval = F, warning=F, message = F}
 # Perform divisive hierarchical clustering
-best_hc <- diana(dist(data_new, method = "maximum"))
+best_hc <- diana( dist(data_new, method = "maximum"))
 
 # Color branches of the dendrogram
 best_hc_colored <- color_branches(as.dendrogram(best_hc), k = 5)  # You can adjust the number of colors (k) as needed
 
 # Plot dendrogram
-plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance")
+plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity from 'maximum' distance")
 ```
 
 **How to use dendrogram?**
@@ -380,14 +359,14 @@ plot(best_hc_colored, main = "Dendrogram with MAXIMUM distance")
 
 ```{r dendrogram2, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
-best_hc <- diana(dist(data_new, method = "maximum"))
+best_hc <- diana(dist(data_new, method = "manhattan"))
 
 # Cut the dendrogram to get the clusters
 clusters <- cutree(best_hc, k = 3)  
 # You can adjust the number of clusters as needed, here we use 3
 
 # Plot the dendrogram with cluster colors
-plot(as.dendrogram(best_hc), main = "Dendrogram with MAXIMUM distance and average linkage (Colored)",
+plot(as.dendrogram(best_hc), main = "Dendrogram with MAXIMUM distance (colored)",
      xlab = "Observations", ylab = "Height")
 rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
 ```
