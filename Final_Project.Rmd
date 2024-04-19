@@ -566,7 +566,7 @@ library(factoextra)
 
 # Fit hierarchical clustering with the chosen parameters
 best_hc2 <- diana(dist(data_no_outlier, method = "euclidean"))
-clusters2 <- cutree(best_hc2, k = 4)  # Set the number of clusters to 3
+clusters2 <- cutree(best_hc2, k = 4)  # Set the number of clusters to 4
 
 # Create a silhouette plot
 silhouette_plot <- fviz_silhouette(
