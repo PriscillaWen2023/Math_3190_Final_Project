@@ -53,13 +53,30 @@ In DIANA, cluster diameter is defined as the largest dissimilarity between any o
 diam(C)=\max_{\textbf{x,y}\in C}d(\textbf{x, y})
 $$ where $d$ is a specified distance function. (The diameter is further used to represent dendrogrammatic 'heights', the change in internal dissimilarity among clusters.).
 
-Let $A$ and $B$ be the clusters split from $C$, where $A\cup B=C$ and $A \cap B = \emptyset$. DIANA is initialized by letting $A=C$ and $B = \{\}$. The algorithm iteratively 'chisels' $A$ and forms $B$: removing points from $A$ and adding them to $B$ from the cluster $C$ with the greatest internal dissimilarity (diameter), with $C\geq 2$. The first iteration identifies a point $\textbf{y}_1$ if it maximizes :\
+Let $A$ and $B$ be the clusters split from $C$, where $A\cup B=C$ and $A \cap B = \emptyset$. DIANA is initialized by letting $A=C$ and $B = \{\}$. The algorithm iteratively 'chisels' $A$ and forms $B$: removing points from $A$ and adding them to $B$ from the cluster $C$ with the greatest internal dissimilarity (diameter), with $C\geq 2$. The first iteration identifies a point $p_1$ if it maximizes the following function:\
 
 $$
 D(\textbf{x}, A\setminus\{\textbf{x}\}) = \dfrac{1}{|A-1|} \sum_{\textbf{y}\in A, \textbf{y} \neq \textbf{x}}{d(\textbf{x}, \textbf{y})}
 $$
 
-Where $d$ is a specified measure of distance and where vectors $\textbf{x}$ and $\textbf{y}$ are either samples (their components are the measure for each feature) or features (their components are the expression of each feature in each sample). Common distance measures include:
+This is the sum of all pairwise distances divided by the cardinality of the initializing cluster less one. Here $d$ is a specified measure of distance and vectors $\textbf{x}$ and $\textbf{y}$ are either samples (their components are the measure for each feature) or features (components are the expressions of each feature in a sample). This can be understood as manner of finding the *average dissimilarity of* $p_1$ to all other points in its cluster, the maximizing point. This point is then removed from $A$ and placed in $B$:
+
+$$
+A_{new} = A_{old} \setminus \{\textbf{x}_1\} \\
+B_{new} = B_{old} \cup \{\textbf{x}_1\}
+$$
+
+The next phase of the algorithm identifies point(s) $p_2$ to $p_n$ by maximizing a slightly modified version of the dissimilarity function:
+
+$$
+D(\textbf{x}, A \setminus \{\textbf{x}\}) - D(\textbf{x}, B ) = 
+\dfrac{1}{|A-1|} \sum_{\textbf{y}\in A, \textbf{y} \neq \textbf{x}}{d(\textbf{x}, \textbf{y})} 
+-\dfrac{1}{|B|} \sum_{\textbf{z}\in B}{d(\textbf{x}, \textbf{z})}
+$$
+
+Iterating among all pairs, the difference of the dissimilarity values for a point $p_2$ over clusters $A$, $B$ may be positive or negative. If a point maximizes this function and this maximal value is positive, the point is split into the other cluster. If the maximal value is negative or \$0\$, the algorithm ends, and the division of $C$ into $A$ and $B$ is complete. There are exist some variations on this basic model, employing some maximization of dissimilarity.
+
+Common distance measures include:
 
 \
 - *Euclidean:* square distance between two vectors (2-norm)
@@ -71,11 +88,6 @@ Where $d$ is a specified measure of distance and where vectors $\textbf{x}$ and 
 \-*Minkowski: the* $p$-norm, that is the $p^{th}$ root of the sum of the $p^{th}$ powers of the differences of the components
 
 \-*Canberra:* essentially the *Manhattan* distance normalized by sum:$\sum{(|x_i-y_i|/|x_i+y_i|)}$ , where zero-terms are omitted from the summation. It can be more sensitive to small differences than the *Manhattan* distance.
-
-TO-DO:
-
-Cover distance metric formulas for:\
-"euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"
 
 Introduce object known as distance or proximity matrix (show example)
 
@@ -294,7 +306,12 @@ Where:
 
 The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where a value close to 1 indicates high similarity between the original pairwise distances and the distances represented by the dendrogram.
 
+The performance of various distance metrics with a data set may be simply evaluated using this statistic.
+
 ```{r cophenetic_cor, echo = T, eval = F, warning=F, message = F}
+
+# List of distance metrics
+distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
 
 # Perform divisive hierarchical clustering and calculate cophenetic metrics
 diana_results <- lapply(distance_metrics, function(distance_metric) {
@@ -345,7 +362,7 @@ best_hc <- diana( dist(data_new, method = "euclidean"))
 best_hc_colored <- color_branches(as.dendrogram(best_hc), k = 5)
 
 # Plot dendrogram
-plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity from euclidean distance")
+plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity based on euclidean distance")
 ```
 
 **How to use dendrogram?**
@@ -429,7 +446,7 @@ cluster_profiles
 
 It appears that observation 10 is an outlier as it is the only observation in Cluster 2. From the dendrogram this point significantly differs from the rest of the data, either due to measurement errors or for some other reasons.
 
-We checked the observation 10, which was Spirited Away with modest budget (\$19.2M) but high revenue (\$395.8M). "Spirited Away" is a renowned and critically acclaimed animated film, so its outlier status might not be due to any inherent issues with the data but rather because of its exceptional success compared to other observations in the dataset.
+We checked the observation 10, which was Spirited Away with a modest budget (\$19.2M) but high revenue (\$395.8M). "Spirited Away" is a renowned and critically acclaimed animated film, so its outlier status might not be due to any inherent issues with the data but rather because of its exceptional success compared to other observations in the dataset.
 
 Removing this outlier allows us to focus on the typical characteristics of the dataset without the influence of such exceptional cases. So we remove this outlier for further analysis.
 
@@ -481,7 +498,7 @@ cat("Distance metric with highest cophenetic correlation:", best_distance_metric
 cat("Cophenetic correlation:", best_result2$cophenetic_correlation, "\n")
 ```
 
-Even with the removal of an outlier, the highest Cophenetic correlation achieved is 0.898, obtained with the Euclidean distance metric. While this correlation is slightly lower than the previous highest, it still reflects a strong overall clustering structure in the data.
+Even with the removal of an outlier, the highest Cophenetic correlation achieved is 0.898, obtained with the Euclidean distance metric. While this correlation is slightly lower than the previous highest, it still reflects a strong overall clustering structure in the data
 
 ```{r dendrogram_no_outlier, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
@@ -530,7 +547,7 @@ cluster_profiles2
 
 ## **II. Silhouette Coefficient**
 
-The Silhouette Coefficient is a measure of how similar an object is to its own cluster (cohesion) compared to other clusters (separation). Silhouette Coefficient measures the relative distance between a data point and its own cluster versus neighboring clusters, providing insight into the quality and separation of clusters in a dataset.
+The Silhouette Coefficient is a measure of how similar an object is to its own cluster (*cohesion*) compared to other clusters (*separation*). Silhouette Coefficient measures the relative distance between a data point and its own cluster versus neighboring clusters, providing insight into the quality and separation of clusters in a dataset.
 
 It ranges from -1 to 1, where a high value indicates that the object is well matched to its own cluster and poorly matched to neighboring clusters.
 
