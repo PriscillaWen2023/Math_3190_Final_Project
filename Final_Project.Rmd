@@ -2,11 +2,11 @@
 title: "Final_Project"
 author: "Cameron Chambers, Bram Stults, Priscilla Wen"
 date: "2024-04-02"
-output: html_document
-#output: beamer_presentation
-header-includes:
-   - \usepackage{multirow}
-editor_options: 
+output:
+  pdf_document: default
+  html_document: default
+header-includes: \usepackage{multirow}
+editor_options:
   chunk_output_type: inline
 urlcolor: blue
 ---
@@ -110,6 +110,8 @@ diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
 **stand**: A logical value indicating whether to standardize the data before clustering. Defaults to FALSE.
 
 **stop.at.k**: A logical value indicating whether to stop clustering at a specific number of clusters (k). Defaults to FALSE (continues until all data points are in separate clusters). **NOT YET IMPLEMENTED (Instead** we would use something like: `cut_clusters <- cutree( diana_result, k=4)` )
+
+Other very important libraries in clustering are the `dendExtend` and `factoExtra` libraries which include a number of clustering and plotting methods and methods useful to aspects of clustering diagnostics.
 
 ## Let's try an example!
 
