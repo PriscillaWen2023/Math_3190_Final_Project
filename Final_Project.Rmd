@@ -103,7 +103,7 @@ diana(x, diss = inherits(x, "dist"), metric = "euclidean", stand = FALSE,
 
 A data set containing a rubric of information about the films of Studio Ghibli... this studio famously deploys little-to-no marketing campaigns in the distribution of its films, relying on the excitement and interest of audiences.
 
-```{r dataset_intro, message=FALSE, eval=T, echo=T}
+```{r dataset_intro, message=FALSE, warning=F, eval=T, echo=T}
 library(dendextend)
 library(ggplot2)
 library(plotly)
@@ -113,22 +113,21 @@ library(stats)
 library(kableExtra)
 
 # Read the Studio Ghibli dataset from URL
-url <- "https://raw.githubusercontent.com/cham24/Math_3190_Final_Project/main/Studio%20Ghibli%20%5Bwith%20rating%5D.csv"
+url <- "https://github.com/cham24/Math_3190_Final_Project/raw/main/Studio%20Ghibli%20%5Bnew%5D.csv"
 data <- read.csv(url, header = TRUE)
 
 # Remove rows with missing values and select specific columns
 data_new <- na.omit(data)
-data_new <- data_new[c("Year", "Budget", "Revenue", "Duration", "Rating.based.on.10.", "Vote..in.kilo.")]
+data_new <- data[c("Year", "Budget_in_.M", "Revenue_in_.M", "Duration", "Rating.based.on.10.", "Vote..in.kilo.")]
 
 # Rename columns
-col_names <- c("Year", "Budget_in_$M", "Revenue_in_$", "Duration_in_Minutes", "Rating", "Vote_in_kilo")
+col_names <- c("Year", "Budget", "Revenue", "Duration", "Rating", "Vote")
 colnames(data_new) <- col_names
-
 ```
 
 Here we see the very basic example using classic Euclidean distance:
 
-```{r basic_euclidean_diana, eval=True, echo=True}
+```{r basic_euclidean_diana, warning=F, eval=True, echo=True}
 
 # diana() clustering
   
@@ -144,7 +143,7 @@ hc_euclid <- diana(
 
 The diana() clustered object contains a matrix representing the sequence of clustering, where the negative signs represent the point split from the cluster (\`\$merge\` is a misnomer):
 
-```{r diana()_merge_sequence, eval=T, echo=T}
+```{r diana()_merge_sequence, warning=F, eval=T, echo=T}
 print(hc_euclid$merge)
 ```
 
@@ -164,7 +163,7 @@ Banner plots display the hierarchy of clusters, equivalent to a tree where banne
 
 Using `cutree()` , the clusters can be restricted, and a new partition will be formed:
 
-```{r clustering_tables, eval=T, echo=T}
+```{r clustering_tables, warning=F, eval=T, echo=T}
 
 # Cluster assignments from cutree()
 cluster_assignments <- cutree(hc_euclid, k = 4)
@@ -334,19 +333,19 @@ cat("Cophenetic correlation:", best_result$cophenetic_correlation, "\n")
 
 ```
 
-Highest Cophenetic correlation is $0.8676$ , which is obtained with MAXIMUM distance.
+Highest Cophenetic correlation is $0.938$ , which is obtained with **euclidean** distance.
 
 This correlation value indicates a strong relationship between the original pairwise distances and the cophenetic distances present in the dendrogrammatic representation.
 
 ```{r dendrogram1, echo = T, eval = F, warning=F, message = F}
 # Perform divisive hierarchical clustering
-best_hc <- diana( dist(data_new, method = "maximum"))
+best_hc <- diana( dist(data_new, method = "euclidean"))
 
 # Color branches of the dendrogram
-best_hc_colored <- color_branches(as.dendrogram(best_hc), k = 5)  # You can adjust the number of colors (k) as needed
+best_hc_colored <- color_branches(as.dendrogram(best_hc), k = 5)
 
 # Plot dendrogram
-plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity from 'maximum' distance")
+plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity from euclidean distance")
 ```
 
 **How to use dendrogram?**
@@ -385,14 +384,14 @@ plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity from 'maximum
 
 ```{r dendrogram2, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
-best_hc <- diana(dist(data_new, method = "manhattan"))
+best_hc <- diana(dist(data_new, method = "euclidean"))
 
 # Cut the dendrogram to get the clusters
 clusters <- cutree(best_hc, k = 3)  
 # You can adjust the number of clusters as needed, here we use 3
 
 # Plot the dendrogram with cluster colors
-plot(as.dendrogram(best_hc), main = "Dendrogram with MAXIMUM distance (colored)",
+plot(as.dendrogram(best_hc), main = "Dendrogram with euclidean distance",
      xlab = "Observations", ylab = "Height")
 rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
 ```
@@ -420,24 +419,26 @@ cluster_profiles
 
 3 Clusters:
 
--   Cluster 1 contains 14 observations: 1, 12, 20, 14, 4, 21, 8, 2, 7, 9, 13, 17, 18, 22
+-   Cluster 1 contains **18** observations: 1, 12, 9, 19, 7, 11, 2, 4, 21, 8, 20, 3, 5, 17, 22, 18, 6, 23
 
--   Cluster 2 contains 8 observations: 3, 5, 11, 23, 15, 6, 10, 16
+-   Cluster 2 contains **1** observations: 10
 
--   Cluster 3 contains 1 observation: 19
+-   Cluster 3 contains **4** observation: 13, 14, 15, 16
 
 #### Removing outlier
 
-It appears that observation 19 is an outlier as it is the only observation in Cluster 3. From the dendrogram this point significantly differs from the rest of the data, perhaps due to error in measurement, data entry, or scale. It seems the film *Pom Poko* from director Isao Takahata, has a budget in a lower range but a revenue recorded as $4,470,000,000$, which is on the scale of $\yen$ in 1994, according to IMDB. Noting this, we scale the value, dividing by the average closing price of USD-YEN in 1994, 102.18, to obtain :
+It appears that observation 10 is an outlier as it is the only observation in Cluster 2. From the dendrogram this point significantly differs from the rest of the data, either due to measurement errors or for some other reasons.
+
+We checked the observation 10, which was Spirited Away with modest budget (\$19.2M) but high revenue (\$395.8M). "Spirited Away" is a renowned and critically acclaimed animated film, so its outlier status might not be due to any inherent issues with the data but rather because of its exceptional success compared to other observations in the dataset.
+
+Removing this outlier allows us to focus on the typical characteristics of the dataset without the influence of such exceptional cases. So we remove this outlier for further analysis.
 
 ```{r data_no_outlier, echo = T, eval = F, warning=F, message = F}
+# Remove outlier observation (10)
+data_no_outlier <- data_new[-10, ]
 
-data_new$`Revenue_in_$`[19] <- data_new$`Revenue_in_$`[19]/102.18
-
-# Scale outlier observation (19)
-data_scale_outlier <- data_new
 # Print the dimensions of the new dataframe
-print(dim(data_scale_outlier))
+print(dim(data_no_outlier))
 ```
 
 ```{r cophenetic_cor_no_outlier, echo = T, eval = F, warning=F, message = F}
@@ -452,7 +453,7 @@ diana_results <- lapply(distance_metrics, function(distance_metric) {
   hc2 <- diana(
     x = distance_matrix2,
     diss = TRUE,
-    keep.diss = nrow(data_scale_outlier) < 100,
+    keep.diss = nrow(data_no_outlier) < 100,
     keep.data = FALSE
   )
   
@@ -480,25 +481,27 @@ cat("Distance metric with highest cophenetic correlation:", best_distance_metric
 cat("Cophenetic correlation:", best_result2$cophenetic_correlation, "\n")
 ```
 
+Even with the removal of an outlier, the highest Cophenetic correlation achieved is 0.898, obtained with the Euclidean distance metric. While this correlation is slightly lower than the previous highest, it still reflects a strong overall clustering structure in the data.
+
 ```{r dendrogram_no_outlier, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
-best_hc2 <- diana(dist(data_scale_outlier, method = "maximum"))
+best_hc2 <- diana(dist(data_no_outlier, method = "euclidean"))
 
-# Cut the dendrogram to get the clusters
-clusters2 <- cutree(best_hc2, k = 3)  # You can adjust the number of clusters as needed
+# we choose 4 clusters based on the natural breaks
+clusters2 <- cutree(best_hc2, k = 4)
 
 # Plot the dendrogram with cluster colors
-plot(as.dendrogram(best_hc2), main = "Dendrogram with MAXIMUM distance ('Pom Poko' revenue rescaled)",
+plot(as.dendrogram(best_hc2), main = "Dendrogram with euclidean distance (without outlier)",
      xlab = "Observations", ylab = "Height")
-rect.hclust(best_hc2, k = 3, border = 2:8)  # Highlight clusters
+rect.hclust(best_hc2, k = 4, border = 2:8)  # Highlight clusters
 ```
 
 ```{r cluster_profiles2, echo = T, eval = F, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
-best_hc2 <- diana(dist(data_no_outlier, method = "maximum"))
+best_hc2 <- diana(dist(data_no_outlier, method = "euclidean"))
 
 # Cut the dendrogram to get the clusters
-clusters2 <- cutree(best_hc2, k = 3)  # Set the number of clusters to 3
+clusters2 <- cutree(best_hc2, k = 4)  # Set the number of clusters to 4
 
 # Combine the original dataframe with the cluster labels
 data_clusters2 <- cbind(data_no_outlier, cluster = clusters2)
@@ -517,11 +520,13 @@ cluster_profiles2
 
 3 Clusters (without outlier):
 
--   Cluster 1 contains 14 observations: 1, 12, 20, 14, 4, 21, 8, 2, 7, 9, 13, 17, 18, 22
+-   Cluster 1 contains 16 observations: 1, 12, 9, 19, 7, 11, 2, 4, 21, 8, 20, 3, 5, 17, 22, 18
 
--   Cluster 2 contains 8 observations: 3, 5, 11, 23, 15, 6
+-   Cluster 2 contains 2 observations: 6, 23
 
--   Cluster 3 contains 1 observation: 10, 16
+-   Cluster 3 contains 2 observation: 13, 14
+
+-   Cluster 4 contains 2 observation: 15, 16
 
 ## **II. Silhouette Coefficient**
 
@@ -560,8 +565,8 @@ library(cluster)
 library(factoextra)
 
 # Fit hierarchical clustering with the chosen parameters
-best_hc2 <- diana(dist(data_scale_outlier, method = "maximum"))
-clusters2 <- cutree(best_hc2, k = 3)  # Set the number of clusters to 3
+best_hc2 <- diana(dist(data_no_outlier, method = "euclidean"))
+clusters2 <- cutree(best_hc2, k = 4)  # Set the number of clusters to 3
 
 # Create a silhouette plot
 silhouette_plot <- fviz_silhouette(
@@ -576,23 +581,21 @@ print(silhouette_plot)
 
 The average silhouette width for each cluster provides insights into the quality and separation of the clusters. Here's an observation for each cluster based on the average silhouette width:
 
-**(1) Cluster 1 (14 observations, average silhouette width: 0.78):**
+**(1) Cluster 1 (16 observations, average silhouette width: 0.52):**
 
--   This cluster exhibits a high average silhouette width, indicating that most observations within this cluster are well-suited to their assigned cluster and less suited to neighboring clusters.
+-   This cluster has a moderate average silhouette width, indicating that most observations within this cluster are reasonably well-matched to their own cluster and have some degree of separation from observations in other clusters.
 
--   The elevated average silhouette width implies strong separation and cohesion within the cluster, with distinct boundaries between clusters.
+**(2) Cluster 2 (2 observations, average silhouette width: 0.28):**
 
-**(2) Cluster 2 (6 observations, average silhouette width: 0.59):**
+-   This cluster has a relatively low average silhouette width, suggesting that the observations within this cluster may be less well-defined or have less distinct boundaries compared to observations in other clusters.
 
--   This cluster demonstrates a moderate average silhouette width, suggesting that observations within this cluster are reasonably well-matched to their own cluster but may also share similarities with neighboring clusters.
+**(3) Cluster 3 (2 observation, average silhouette width: 0.60):**
 
--   The moderate average silhouette width indicates moderate separation and cohesion within the cluster, with some instances of overlap or ambiguity.
+-   This cluster has a moderate to high average silhouette width, indicating good separation and cohesion among its observations. The relatively high silhouette width suggests that the observations within this cluster are well-matched to their own cluster and are distinct from observations in other clusters.
 
-**(3) Cluster 3 (2 observation, average silhouette width: 0.56):**
+**(4) Cluster 4 (2 observation, average silhouette width: 0.79):**
 
--   This cluster comprises only two observations, and despite its small size, it still manages to achieve a positive average silhouette width of 0.56.
-
--   This suggests that these two observations are more similar to each other than they are to observations in other clusters.
+-   With a high average silhouette width, this cluster demonstrates excellent separation and cohesion among its observations. The high silhouette width indicates that the observations within this cluster are very well-matched to their own cluster and are clearly distinct from observations in other clusters.
 
 # Completing Analysis
 
@@ -606,49 +609,63 @@ Let's summarize the features of each cluster based on the provided cluster profi
 
 **Cluster 1:**
 
--   **Year:** Films in this cluster tend to be from around 1996.57.
+-   Year: Around 1999.5
 
--   **Budget:** The average budget for films in this cluster is approximately \$93.24 million.
+-   Budget: Approximately \$13.7 million USD
 
--   **Revenue:** Films in this cluster typically generate revenue of around \$26,222,059.
+-   Revenue: Around \$44.76 million USD
 
--   **Duration:** The average duration of films in this cluster is approximately 102.93 minutes.
+-   Duration: Average duration of approximately 106.81 minutes
 
--   **Rating:** Films in this cluster have an average rating of about 7.61.
+-   Rating: Average rating of about 7.48
 
--   **Vote Count:** The average number of votes for films in this cluster is around 122.21 thousand.
+-   Vote: Average number of votes around 79.63 thousand
 
 **Cluster 2:**
 
--   **Year:** Films in this cluster are more recent, with an average release year of around 2008.33.
+-   Year: Around 2015.5
 
--   **Budget:** The average budget for films in this cluster is lower than Cluster 1, at about \$38.50 million.
+-   Budget: Average budget of \$67 million USD
 
--   **Revenue:** Films in this cluster tend to have higher revenue, averaging around \$162,136,149.
+-   Revenue: Average revenue of \$249.5 million USD
 
--   **Duration:** The average duration of films in this cluster is approximately 113.67 minutes.
+-   Duration: Average duration of 112 minutes
 
--   **Rating:** Films in this cluster have a slightly higher average rating of about 7.67.
+-   Rating: Average rating of approximately 7.6
 
--   **Vote Count:** The average number of votes for films in this cluster is around 144.00 thousand.
+-   Vote: Average number of votes around 106.5 thousand
 
 **Cluster 3:**
 
--   **Year:** Films in this cluster are from around 2002.50 on average.
+-   Year: Around 1988.0
 
--   **Budget:** The average budget for films in this cluster is the lowest among the clusters, at approximately \$21.50 million.
+-   Budget: Average budget of \$15.25 million USD
 
--   **Revenue:** Films in this cluster tend to have the highest revenue, averaging around \$255,487,426.
+-   Revenue: Average revenue of \$20.76 million USD
 
--   **Duration:** The average duration of films in this cluster is the longest, at about 122.00 minutes.
+-   Duration: Average duration of 87.5 minutes
 
--   **Rating:** Films in this cluster have the highest average rating of about 8.40.
+-   Rating: Average rating of approximately 8.3
 
--   **Vote Count:** Films in this cluster also have the highest average vote count, at around 647.50 thousand.
+-   Vote: Average number of votes around 344.5 thousand
 
-# Strengths, Weaknesses
+**Cluster 4:**
 
-### Strengths:
+-   Year: Around 2000.5
+
+-   Budget: Average budget of \$23.75 million USD
+
+-   Revenue: Average revenue of \$215.15 million USD
+
+-   Duration: Average duration of 126.5 minutes
+
+-   Rating: Average rating of approximately 8.25
+
+-   Vote: Average number of votes around 440.5 thousand
+
+# Conclusions
+
+## Strengths:
 
 1.  **Interpretability**: Divisive clustering produces a hierarchical structure of clusters, making it easier to interpret and understand the relationships between clusters at different levels of granularity. This hierarchical representation can provide insights into the natural grouping of data and the hierarchical organization of clusters.
 
@@ -660,7 +677,7 @@ Let's summarize the features of each cluster based on the provided cluster profi
 
 5.  **Top-Down Exploration**: Divisive clustering allows analysts to perform top-down exploration of the data, starting with a global view of the entire dataset and progressively refining the clustering structure to reveal finer-grained patterns and relationships. This top-down approach can be beneficial for gaining insights into the hierarchical organization of data and identifying clusters at different levels of abstraction.
 
-### Weaknesses:
+## Weaknesses:
 
 1.  **Sensitivity to Initial Conditions**: Divisive clustering heavily relies on the initial selection of clusters, which can affect the final clustering results. Depending on the choice of initial cluster seeds, the algorithm may converge to different solutions, leading to variations in the clustering outcome.
 
