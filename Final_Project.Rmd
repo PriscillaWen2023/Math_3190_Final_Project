@@ -74,7 +74,7 @@ D(\textbf{x}, A \setminus \{\textbf{x}\}) - D(\textbf{x}, B ) =
 -\dfrac{1}{|B|} \sum_{\textbf{z}\in B}{d(\textbf{x}, \textbf{z})}
 $$
 
-Iterating among all pairs, the difference of the dissimilarity values for a point $p_2$ over clusters $A$, $B$ may be positive or negative. If a point maximizes this function and this maximal value is positive, the point is split into the other cluster. If the maximal value is negative or \$0\$, the algorithm ends, and the division of $C$ into $A$ and $B$ is complete. There are exist some variations on this basic model, employing some maximization of dissimilarity.
+Iterating among all pairs, the difference of the dissimilarity values for a point $p_2$ over clusters $A$, $B$ may be positive or negative. If a point maximizes this function and this maximal value is positive, the point is split into the other cluster. If the maximal value is negative or $0$, the algorithm ends, and the division of $C$ into $A$ and $B$ is complete. There exist some variations on this basic model, employing some maximization of dissimilarity.
 
 Common distance measures include:
 
@@ -89,7 +89,7 @@ Common distance measures include:
 
 \-*Canberra:* essentially the *Manhattan* distance normalized by sum:$\sum{(|x_i-y_i|/|x_i+y_i|)}$ , where zero-terms are omitted from the summation. It can be more sensitive to small differences than the *Manhattan* distance.
 
-Introduce object known as distance or proximity matrix (show example)
+TO DO Introduce object known as distance or proximity matrix (show example)
 
 ## **DIANA in R**
 
@@ -155,17 +155,28 @@ hc_euclid <- diana(
 
 ```
 
-The diana() clustered object contains a matrix representing the sequence of clustering, where the negative signs represent the point split from the cluster (\`\$merge\` is a misnomer):
+The diana() clustered object contains a matrix representing the sequence of clustering, where the negative signs represent the point split from the cluster (\`\$merge\` is a misnomer). In the case of DIANA, the `$merge` matrix is in reverse order of the actual splitting to appear in the dendrogrammatic representation, thus reversing this will supply the order of splits:
 
 ```{r diana()_merge_sequence, warning=F, eval=T, echo=T}
-print(hc_euclid$merge)
+
+reversed_merge_matrix <- hc_euclid$merge[ nrow(hc_euclid$merge):1, ]
+print(reversed_merge_matrix)
+
 ```
 
--   **Row 1:** `[-11, -23]`: In the first step, data points with indices -11 and -23 (assuming they were initially in the same cluster) were separated into individual clusters.
+-   **Row 1:** `[21, -10]`: In the first step, data points with indices 21 and -10, initially in the same cluster, are separated by moving point 10 into a separate cluster (see dendogram below).
 
--   **Row 4:** `[-7, 2]`: Data point with index -7 was isolated from a cluster, while data point with index 2 remained in the existing cluster.
+-   **Rows 2-6 :**: Data points in these rows remained in a self-same cluster, relative to dissimilarity in the cluster grouping point 10.
 
--   **Row 9:** `[4, 7]`: Clusters with indices 4 and 7 (referring to rows in the `hc_euclid` object) were merged.
+-   **Row 7:** `[-6, -23]`: Clusters with indices -6 and -23 (here simply referring to rows in the `hc_euclid` object) were separated from this cluster and from each other. The process taken can thus be tracked at a step-by-step basis. Further, the heights of splits are also recorded in the `$height` attribute, these measures are what is used to construct the dendogram and can be interpreted as another measure of dissimilarity. As with the `$merge` attribute, the order of splits are presented last-to-first:
+
+```{r}
+
+reversed_height_vector <- hc_euclid$height[ length(hc_euclid$height):1 ]
+print(reversed_height_vector)
+
+```
+It seems the split involving observation $10$ occurs at a dissimilarity height much greater than others.
 
 A basic dendrogram and banner plot can be directly plotted using plot() with the cluster object:
 
