@@ -3,8 +3,8 @@ title: "Final_Project"
 author: "Cameron Chambers, Bram Stults, Priscilla Wen"
 date: "2024-04-02"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 header-includes: \usepackage{multirow}
 editor_options:
   chunk_output_type: inline
@@ -56,7 +56,7 @@ Yet a major forthcoming advantage of divisive hierarchical methods is that they 
 
 (2) A polythetic method splits data based on the values of all (many) attributes.
 
-Moreover, divisive hierarchical clustering is *monotone*. At each level (depending on the definition of said 'level'), the subclusters being formed must have a smaller level than the parent cluster. Under these
+Moreover, divisive hierarchical clustering is *monotone*. At each level (depending on the definition of said 'level'), the subclusters being formed must have a smaller level than the parent cluster.
 
 The totality of data, a single cluster composed of $n$-objects, is gradually split at each lower level into smaller clusters. Each cluster's "internal" dissimilarity diminishes, while the total number of clusters increases, following some criteria. A final hierarchy partitions each individual observation in its own, isolated 'cluster' at the lowest level, entirely 'similar' to itself. This divisive hierarchy then is formed in $n-1$ (potential) steps, with $2^{|n|-1}-1$ non-trivial possibilities to split data into two, a very large number of possible partitions. It would seem that finding an 'optimal' bipartition is NP-hard (Gan, 2007).
 
@@ -104,11 +104,11 @@ Common distance measures include:
 
 \-*Canberra:* essentially the *Manhattan* distance normalized by sum:$\sum{(|x_i-y_i|/|x_i+y_i|)}$ , where zero-terms are omitted from the summation. It can be more sensitive to small differences than the *Manhattan* distance.
 
-The 'pair-wise' character of the dissimilarity computation leads to the object known as the distance matrix.  Consider the following example calculated with euclidean distances.
+The 'pair-wise' character of the dissimilarity computation leads to the object known as the distance matrix. Consider the following example calculated with euclidean distances.
 
 ```{r distance_matrix_example_1, eval=T, echo=T}
 
-set.seed(2024)
+set.seed(1234)
 
 # synthetic data
 normal_x <- rnorm(5, mean = 3, sd = 1) |>  round() |>  as.vector()
@@ -116,7 +116,7 @@ normal_y <- rnorm(5, mean = 3, sd = 2) |>  round() |>  as.vector()
 
 normal_data <- data.frame(x = normal_x, y = normal_y)
 
-ggplot(data, aes(x = x, y = y)) +
+ggplot(normal_data, aes(x = x, y = y)) +
   geom_point(size=2.5) +
   labs(title = "Two-dimensional Data", x = "X", y = "Y") +
   coord_cartesian(xlim = c(0, 5), ylim = c(0, 5))
@@ -149,6 +149,7 @@ distance_table <- add_header_above(distance_table,
 
 distance_table
 ```
+
 This is the object over which divisive hierarchical algorithms iterate.
 
 ## **DIANA in R**
@@ -201,7 +202,7 @@ colnames(data_new) <- col_names
 
 Here we see the very basic example using classic Euclidean distance:
 
-```{r basic_euclidean_diana, warning=F, eval=True, echo=True}
+```{r basic_euclidean_diana, warning=F, eval=T, echo=T}
 
 # diana() clustering
   
@@ -217,7 +218,7 @@ hc_euclid <- diana(
 
 The diana() clustered object contains a matrix representing the sequence of clustering, where the negative signs represent the point split from the cluster (\`\$merge\` is a misnomer). In the case of DIANA, the `$merge` matrix is in reverse order of the actual splitting to appear in the dendrogrammatic representation, thus reversing this will supply the order of splits:
 
-```{r diana()_merge_sequence, warning=F, eval=T, echo=T}
+```{r diana_merge_sequence, warning=F, eval=T, echo=T}
 
 reversed_merge_matrix <- hc_euclid$merge[ nrow(hc_euclid$merge):1, ]
 print(reversed_merge_matrix)
@@ -230,14 +231,14 @@ print(reversed_merge_matrix)
 
 -   **Row 7:** `[-6, -23]`: Clusters with indices -6 and -23 (here simply referring to rows in the `hc_euclid` object) were separated from this cluster and from each other. The process taken can thus be tracked at a step-by-step basis. Further, the heights of splits are also recorded in the `$height` attribute, these measures are what is used to construct the dendogram and can be interpreted as another measure of dissimilarity. As with the `$merge` attribute, the order of splits are presented last-to-first:
 
-```{r}
+```{r height_attribute, eval=T, echo=T}
 
 reversed_height_vector <- hc_euclid$height[ length(hc_euclid$height):1 ]
 print(reversed_height_vector)
 
 ```
 
-It seems the split involving observation $10$ occurs at a dissimilarity height much greater than others.
+As can be seen, the split involving observation $10$ occurs at a dissimilarity height much greater than others.
 
 A basic dendrogram and banner plot can be directly plotted using plot() with the cluster object:
 
@@ -382,7 +383,7 @@ The resulting cophenetic correlation coefficient $c$ ranges from -1 to 1, where 
 
 The performance of various distance metrics with a data set may be simply evaluated using this statistic.
 
-```{r cophenetic_cor, echo = T, eval = F, warning=F, message = F}
+```{r cophenetic_cor, echo = T, eval = T, warning=F, message = F}
 
 # List of distance metrics
 distance_metrics <- c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
@@ -524,7 +525,7 @@ We checked the observation 10, which was Spirited Away with a modest budget (\$1
 
 Removing this outlier allows us to focus on the typical characteristics of the dataset without the influence of such exceptional cases. So we remove this outlier for further analysis.
 
-```{r data_no_outlier, echo = T, eval = F, warning=F, message = F}
+```{r data_no_outlier, echo = T, eval = T, warning=F, message = F}
 # Remove outlier observation (10)
 data_no_outlier <- data_new[-10, ]
 
@@ -532,7 +533,7 @@ data_no_outlier <- data_new[-10, ]
 print(dim(data_no_outlier))
 ```
 
-```{r cophenetic_cor_no_outlier, echo = T, eval = F, warning=F, message = F}
+```{r cophenetic_cor_no_outlier, echo = T, eval = T, warning=F, message = F}
 # Perform divisive hierarchical clustering and calculate cophenetic metrics
 
 diana_results <- lapply(distance_metrics, function(distance_metric) {
@@ -574,7 +575,7 @@ cat("Cophenetic correlation:", best_result2$cophenetic_correlation, "\n")
 
 Even with the removal of an outlier, the highest Cophenetic correlation achieved is 0.898, obtained with the Euclidean distance metric. While this correlation is slightly lower than the previous highest, it still reflects a strong overall clustering structure in the data
 
-```{r dendrogram_no_outlier, echo = T, eval = F, warning=F, message = F}
+```{r dendrogram_no_outlier, echo = T, eval = T, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
 best_hc2 <- diana(dist(data_no_outlier, method = "euclidean"))
 
@@ -587,7 +588,7 @@ plot(as.dendrogram(best_hc2), main = "Dendrogram with euclidean distance (withou
 rect.hclust(best_hc2, k = 4, border = 2:8)  # Highlight clusters
 ```
 
-```{r cluster_profiles2, echo = T, eval = F, warning=F, message = F}
+```{r cluster_profiles2, echo = T, eval = T, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
 best_hc2 <- diana(dist(data_no_outlier, method = "euclidean"))
 
@@ -643,7 +644,7 @@ $$
 
 $s_i​$ represents the Silhouette Coefficient for data point $i$, $a_i$​ represents the average distance from $i$ to all other points in the same cluster, and $b_i$​ represents the minimum average distance from $i$ to all points in neighboring clusters.
 
-```{r silhouette, warning=F}
+```{r silhouette, eval=T, echo=T, warning=F}
 library(cluster)
 
 # Compute silhouette scores
@@ -651,8 +652,7 @@ sil_scores <- silhouette(clusters2, dist(data_clusters2))
 sil_scores
 ```
 
-```{r silhouette_graph, warning=F}
-library(cluster)
+```{r silhouette_graph, eval=T, echo=T, warning=F}
 library(factoextra)
 
 # Fit hierarchical clustering with the chosen parameters
@@ -690,7 +690,7 @@ The average silhouette width for each cluster provides insights into the quality
 
 # Completing Analysis
 
-```{r cluster description, warning=FALSE}
+```{r cluster_description, eval=T, echo=T, warning=FALSE}
 cluster_profiles2
 ```
 
@@ -800,7 +800,7 @@ Let's summarize the features of each cluster based on the provided cluster profi
 
 #### Footnote: Agglomerative Clustering R Shiny App
 
-```{r shiny, echo = T, eval = F, message = F}
+```{r shiny_agglomerative, echo = F, eval = F, message = F}
 library(shiny)
 library(shinydashboard)
 library(stats)
