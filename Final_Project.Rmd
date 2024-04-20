@@ -106,37 +106,47 @@ Common distance measures include:
 
 The 'pair-wise' character of the dissimilarity computation leads to the object known as the distance matrix.  Consider the following example calculated with euclidean distances.
 
-```{r distance_matrix_example, eval=T, echo=T}
+```{r distance_matrix_example_1, eval=T, echo=T}
 
-set.seed(1234)
+set.seed(2024)
 
-normal_data <- rnorm(5, mean = 3, sd = 1.5) |> 
-  round() |> 
-  as.vector()
+# synthetic data
+normal_x <- rnorm(5, mean = 3, sd = 1) |>  round() |>  as.vector()
+normal_y <- rnorm(5, mean = 3, sd = 2) |>  round() |>  as.vector()
+
+normal_data <- data.frame(x = normal_x, y = normal_y)
+
+ggplot(data, aes(x = x, y = y)) +
+  geom_point(size=2.5) +
+  labs(title = "Two-dimensional Data", x = "X", y = "Y") +
+  coord_cartesian(xlim = c(0, 5), ylim = c(0, 5))
+```
+
+```{r distance_matrix_example_2, eval=T, echo=T}
 
 # Pairwise Euclidean distances into a matrix
-distance_matrix <- data.frame(matrix(0, nrow = length(normal_data), 
-                                      ncol = length(normal_data)))
 
+n_points <- nrow(normal_data)
 
-for (i in 1:length(normal_data)) {
-  for (j in 1:length(normal_data)) {
-    distance_matrix[i, j] <- sqrt(sum((normal_data[i] - normal_data[j])^2))
+distance_matrix <- matrix(0, nrow = n_points, ncol = n_points)
+
+#pairwise Euclidean distances
+for (i in 1:n_points) {
+  for (j in 1:n_points) {
+    distance_matrix[i, j] <- sqrt(sum((normal_data[i, ] - normal_data[j, ])^2))
   }
 }
 
 rownames(distance_matrix) <- paste0('Point ', c("a","b","c","d","e"))
 colnames(distance_matrix) <- rownames(distance_matrix)
 
-# Print the distance matrix using kableExtra
+
 distance_table <- kable(distance_matrix, format = "html", digits = 2) %>%
   kable_styling(full_width = F)
 
-# Add a title label
 distance_table <- add_header_above(distance_table, 
                                    header = c("Distance Matrix" = ncol(distance_matrix)+1))
 
-# Print the table
 distance_table
 ```
 This is the object over which divisive hierarchical algorithms iterate.
