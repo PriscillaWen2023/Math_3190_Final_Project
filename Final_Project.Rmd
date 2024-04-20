@@ -13,7 +13,7 @@ urlcolor: blue
 
 # Introduction
 
-Modeling with *unsupervised learning* forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (pg. *xi*, Hastie et al., 2009). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$. This can be conceived at an elementary level as 'analyzing the variance' of $X_{Np}$, evaluating association without regard to predicting an outcome.
+Modeling with *unsupervised learning* forgoes the precise prediction of a measured outcome in order to describe patterns of association among 'input measures': the many observations of a feature space (Hastie et al., 2009). We have only $N$-observations $(x_1, x_2, ... x_N)$ of a random $p$-vector $X$ and we wish to directly infer properties of the joint-probability distribution $Pr(X)$. "Cluster analysis attempts to find multiple convex regions of the X-space that contain modes of Pr(X)" (Hastie et al., 2009, pg. *xi*). In essence, we are attempting to see whether $Pr(X)$ can be represented by simpler densities which represent distinct types of constituent observations of $X$. This can be conceived at an elementary level as 'analyzing the variance' of $X_{Np}$, evaluating association without regard to predicting an outcome.
 
 Hierarchical clustering does not require the titular, initializing '$k$' of the $K$-means algorithm, nor an initializing *guess* as to centroids of clusters. *Divisive* hierarchical clustering is based on a chosen measure of *dissimilarity* among pairwise observations. These pairwise 'dissimilarities' are the basis for the disjunction of groups of observations: clusters. This, in turn, is a modular description of one part of an emergent hierarchy.
 
@@ -25,11 +25,11 @@ An example given by Steve Oudot concerning the problem of the scale of data: thi
 
 ![*Clustering based on single-linkage produces a dendogram revealing relevant scale*](A-B_planar_point_Hierarchical_Cluster.jpg)
 
-Each visual point in the image occupies its own cluster at the lowest scale (from about 0 to 5), each $B$ is a cluster at the middle level, and the final level above the last merge is the entire $A$ (in the divisive context, one might suppose the first split represents the two halves or legs of the $A$). The hierarchy of scale, or of some innate linear hierarchy, is well represented by hierarchical clustering.
+Each visual point in the image occupies its own cluster at the lowest scale (from about 0 to 5), each $B$ is a cluster at the middle level, and the final level above the last merge is the entire $A$ (in the divisive context, one might suppose the first split represents the two halves or legs of the $A$). The hierarchy of scale, or of some innate linear hierarchy, is well represented by hierarchical clustering.  Indeed this is a key benefit of hierarchical clustering compared to $K$-Means clustering.  $K$-means requires a $k$ number of clusters to be specified and initial cluster centers to be assigned, to which the algorithm is sensitive: as $k$ is changed the clusters change in arbitrary ways,  whereas hierarchical clustering does not require either of these. $K$-means does not provide any linear ordering of cluster objects, whereas this is emergent property of the clustering hierarchy (Hastie et al., 2009, pg. 514)
 
 ## Background
 
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (pg. 486, Hastie et al., 2009). Both types of algorithm ***divide a data set into a sequence of nested partitions*** (Gan, 109). They both are also subject to some of the same drawbacks:
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (Hastie et al., 2009, pg. 486). Both types of algorithm ***divide a data set into a sequence of nested partitions*** (Gan, 2007, pg. 109). They both are also subject to some of the same drawbacks:
 
 -   data points which were split at an early phase will not be reallocated later
 -   various dissimilarity measures lead to differing hierarchies
@@ -41,7 +41,7 @@ Yet a major forthcoming advantage of divisive hierarchical methods is that they 
 
 (2) A polythetic method splits data based on the values of all (many) attributes.
 
-Moreover, divisive hierarchical clustering is *monotone*. At each level (depending on the definition of said 'level'), the subclusters being formed must have a smaller level than the parent cluster.
+Moreover, divisive hierarchical clustering is *monotone*. At each level (depending on the definition of said 'level'), the subclusters being formed must have a smaller level than the parent cluster.  Under these 
 
 The totality of data, a single cluster composed of $n$-objects, is gradually split at each lower level into smaller clusters. Each cluster's "internal" dissimilarity diminishes, while the total number of clusters increases, following some criteria. A final hierarchy partitions each individual observation in its own, isolated 'cluster' at the lowest level, entirely 'similar' to itself. This divisive hierarchy then is formed in $n-1$ (potential) steps, with $2^{|n|-1}-1$ non-trivial possibilities to split data into two, a very large number of possible partitions. It would seem that finding an 'optimal' bipartition is NP-hard (Gan, 2007).
 
