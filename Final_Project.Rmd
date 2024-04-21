@@ -269,6 +269,8 @@ The most common diagnostic measure in hierarchical clustering is arguably the de
 ## RShiny App : Reactive Dendrogram
 
 ```{r shiny, echo = T, eval = F, message = F}
+# Dendogram Viewer v.1
+
 library(shiny)
 library(shinydashboard)
 library(cluster)
@@ -350,23 +352,25 @@ shinyApp(ui, server)
 ```
 
 ``` {r}
+# Dendogram Viewer v.2
+
 library(shiny)
 library(shinydashboard)
 library(cluster)  
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
+  dashboardHeader(title = "Dendrogram Viewer"),
   dashboardSidebar(
-    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    fileInput("dataFile", "Upload dataset", accept = ".csv"),
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput("distanceType", "Select Distance Type",
-                choices = c("euclidean", "manhattan"), selected = "euclidean"),  
+                choices = c("euclidean", "manhattan", "minkowski"), selected = "euclidean"),
     sliderInput("numClusters", "Number of Clusters:", min = 2, max = 10, value = 3),
     actionButton("update", "Update Selection")
   ),
   dashboardBody(
-    plotOutput("dendrogramPlot", height = "100vh")  
+    plotOutput("dendrogramPlot", height = "90vh")  
   )
 )
 
@@ -417,7 +421,7 @@ server <- function(input, output, session) {
       diana_clust <- diana(dist_matrix)
       clusters <- cutree(diana_clust, k = input$numClusters)
       plot(diana_clust, labels = df[,1], main = "Dendrogram of Divisive Hierarchical Clustering")
-      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:6)
+      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:8)
     }
   })
 }
