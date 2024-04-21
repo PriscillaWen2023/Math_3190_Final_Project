@@ -282,7 +282,7 @@ ui <- dashboardPage(
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput("distanceType", "Select Distance Type",
-                choices = c("euclidean", "manhattan", "minkowski"), selected = "euclidean"),
+                choices = c("euclidean", "manhattan", "minkowski", "canberra", "binary", "maximum"), selected = "euclidean"),
     sliderInput("numClusters", "Number of Clusters:", min = 2, max = 10, value = 3),
     actionButton("update", "Update Selection")
   ),
@@ -365,7 +365,7 @@ ui <- dashboardPage(
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput("distanceType", "Select Distance Type",
-                choices = c("euclidean", "manhattan", "minkowski"), selected = "euclidean"),
+                choices = c("euclidean", "manhattan", "minkowski", "canberra", "binary", "maximum"), selected = "euclidean"),
     sliderInput("numClusters", "Number of Clusters:", min = 2, max = 10, value = 3),
     actionButton("update", "Update Selection")
   ),
