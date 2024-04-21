@@ -285,7 +285,7 @@ ui <- dashboardPage(
     actionButton("update", "Update Selection")
   ),
   dashboardBody(
-    plotOutput("dendrogramPlot"),
+    plotOutput("dendrogramPlot", height="90vh"),
     verbatimTextOutput("fileInfo")
   )
 )
@@ -304,12 +304,88 @@ server <- function(input, output, session) {
     updateSelectInput(session, "numColumns", choices = names(df)[sapply(df, is.numeric)])
   })
 
-  output$fileInfo <- renderPrint({
+ output$fileInfo <- renderPrint({
+   df <- data()
+   if (is.null(df)) {
+     "No file uploaded."
+   } else {
+     summary(df)
+   }
+ })
+
+  output$dendrogramPlot <- renderPlot({
+    req(input$update)
     df <- data()
-    if (is.null(df)) {
-      "No file uploaded."
-    } else {
-      summary(df)
+    if (is.null(df) || is.null(input$numColumns)) {
+      return()
+    }
+    clean_data <- df[, input$numColumns]
+    clean_data <- apply(clean_data, 2, function(column) {
+      if (any(is.na(column))) {
+        column[is.na(column)] <- mean(column, na.rm = TRUE)
+      }
+      return(column)
+    })
+
+    dist_matrix <- tryCatch({
+      dist(clean_data, method = input$distanceType)
+    }, warning = function(w) {
+      cat("Warning: ", w$message, "\n")
+      return(NULL)
+    }, error = function(e) {
+      cat("Error: ", e$message, "\n")
+      return(NULL)
+    })
+
+    if (!is.null(dist_matrix)) {
+      diana_clust <- diana(dist_matrix)
+      clusters <- cutree(diana_clust, k = input$numClusters)
+      plot(diana_clust, labels = df[,1], main = "Dendrogram of Divisive Hierarchical Clustering")
+      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:6)
+    }
+  })
+}
+
+shinyApp(ui, server)
+```
+
+``` {r}
+library(shiny)
+library(shinydashboard)
+library(cluster)  
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
+  dashboardSidebar(
+    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    selectInput("numColumns", "Select numeric columns for clustering",
+                choices = NULL, selected = NULL, multiple = TRUE),
+    selectInput("distanceType", "Select Distance Type",
+                choices = c("euclidean", "manhattan"), selected = "euclidean"),  
+    sliderInput("numClusters", "Number of Clusters:", min = 2, max = 10, value = 3),
+    actionButton("update", "Update Selection")
+  ),
+  dashboardBody(
+    plotOutput("dendrogramPlot", height = "100vh")  
+  )
+)
+
+server <- function(input, output, session) {
+  data <- reactive({
+    inFile <- input$dataFile
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    # df <- 
+    read.csv(inFile$datapath, na.strings = c("NA", "na", ""))
+    # row.names(df) <- df$Name
+    # df[, !(names(df) %in% c("Name"))]  
+  })
+  
+  observe({
+    df <- data()
+    if (!is.null(df)) {
+      updateSelectInput(session, "numColumns", choices = names(df)[sapply(df, is.numeric)])
     }
   })
 
@@ -340,7 +416,7 @@ server <- function(input, output, session) {
     if (!is.null(dist_matrix)) {
       diana_clust <- diana(dist_matrix)
       clusters <- cutree(diana_clust, k = input$numClusters)
-      plot(diana_clust, labels = clusters, main = "Dendrogram of Divisive Hierarchical Clustering")
+      plot(diana_clust, labels = df[,1], main = "Dendrogram of Divisive Hierarchical Clustering")
       rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:6)
     }
   })
