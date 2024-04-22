@@ -350,17 +350,23 @@ shinyApp(ui, server)
 
 ## I. Cophenetic Distance & Correlation
 
-TO-DO : give explanation/definition of cophenetic distance
-
-***Cophenetic correlation*** is a statistic representing how well a dendrogram preserves the pairwise distances between data points. It assesses the fidelity of a hierarchical clustering solution by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points.
+The ***cophenetic correlation coefficient*** is a statistic representing how well a dendrogram preserves the pairwise distances between data points. It is the correlation between the $2^{|n|-1}-1$ pairwise dissimilarities from the proximity matrix evaluated by the algorithm and their corresponding *cophenetic dissimilarities* (or 'distance')derived from the dendogram. The fidelity of a hierarchical clustering solution is assessed by comparing the distances in the original data space with the distances represented by the dendrogram. A high cophenetic correlation indicates that the dendrogram accurately represents the underlying pairwise distances between data points. This, however, is not as well defined, or rather not directly applied, in the divisive case. Rather than merging, clusters are divided based on a splitting criterion. Thus other, alternative measures are also employed such as *intra-cluster variation*, the *silhouette coefficient*, or the *Davies Bouldin* index which compares average intra-cluster varition to the inter-cluster separation.
 
 **(1) Compute the Original Pairwise Distances**: Start by calculating the pairwise distances between all data points in the original dataset using an appropriate distance metric (e.g., Euclidean distance, Manhattan distance, etc.).
 
-**(2) Compute Cophenetic Distances**: For each pair of data points, calculate the cophenetic distance, which is the height at which the two points are first merged into the same cluster in the dendrogram.
+**(2) Compute Cophenetic Distances**: For each pair of data points, calculate the cophenetic dissimilarity or distance $c_{ij}$: the height at which the two points are first merged into the same cluster in the dendrogram. This is, in other words, "the intergroup dissimilarity at which observations $i$ and $i'$ are first joined together in the same cluster" (Hastie et al. 2009, pg. 522) in the agglomerative case. In the divisive case, where the nodes represent clusters at each splitting level, their positions are based on the 'distance' or dissimilarity between the clusters formed at each split.
 
-**(3) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances. This correlation coefficient is the cophenetic correlation.
+This is considered a "very restrictive" dissimilarity measure as $c_{ij}$ over the observations must contain many 'ties' or links, since only $n-1$ (number of splits) of the total $2^{|n|-1}-1$ dissimilarity values can be distinct (Hastie et al. 2009, pg. 522). For any three dissimilarity values $i, j, k$, they conform to the 'ultrametric inequality':
 
-Mathematically, the cophenetic correlation $c$ is computed using the following formula:
+$$
+c_{ij} \leq \max\{c_{ik}, c_{jk}\}
+$$
+
+Where, say in Euclidean space, these are points with Euclidean coordinates and the set of interpoint distances form an isosceles triangle for all triples of points with the unequal length no longer than the length of the two equal sides (Hastie et al. 2009, pg. 523). Thus general dissimilarities in arbitrary data sets do not truly resemble the cophenetic dissimilarities and the dendrogram is best understood as a clustering structure imposed by the algorithm.
+
+**(3) Compute Cophenetic Correlation**: Once you have the original pairwise distances and the corresponding cophenetic distances, calculate the correlation coefficient between these two sets of distances.
+
+The cophenetic correlation $c$ is computed using the following formula, the sum of a product of differences divided by its norm:
 
 $$c = \frac{\sum_{i < j}(d_{ij} - \bar{d})(c_{ij} - \bar{c})}{\sqrt{\sum_{i < j}(d_{ij} - \bar{d})^2 \sum_{i < j}(c_{ij} - \bar{c})^2}}$$
 
@@ -368,7 +374,7 @@ Where:
 
 -   $d_{ij}$ is the original pairwise distance between data points $i$ and $j$.
 
--   $c_{ij}$ is the cophenetic distance between data points $i$ and $j$ in the dendrogram.
+-   $c_{ij}$ is the cophenetic distance between data points $i$ and $j$ in the dendrogram, the height of their splitting node.
 
 -   $\bar{d}$ is the mean of the original pairwise distances.
 
@@ -461,13 +467,13 @@ plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity based on eucl
 
 **(4) Identifying Inconsistencies:**
 
--   **Inconsistent Merging**: Look for instances where clusters are merged at varying distances. Inconsistent merging may indicate suboptimal clustering or noisy data.
+-   **Inconsistent Splitting**: Look for instances where clusters are split at varying distances. Inconsistent splitting may indicate suboptimal clustering or noisy data.
 
--   **Abnormal Patterns**: Watch out for abnormal patterns such as clusters merging and then splitting again shortly afterward. These patterns may suggest errors in the clustering process or the presence of outliers.
+-   **Abnormal Patterns**: More apt in the case of agglomerative clustering: watch out for abnormal patterns such as clusters splitting and then merging shortly afterward. These patterns may suggest errors in the clustering process or the presence of outliers.
 
 **(5) Iterative Refinement:**
 
--   **Experiment with Parameters**: Adjust clustering parameters such as distance metrics or linkage methods and observe the changes in the dendrogram structure.
+-   **Experiment with Parameters**: Adjust clustering parameters such as distance metrics and observe the changes in the dendrogram structure.
 
 -   **Compare Results**: Compare dendrograms generated with different parameter settings to identify the most stable and meaningful clustering solution.
 
