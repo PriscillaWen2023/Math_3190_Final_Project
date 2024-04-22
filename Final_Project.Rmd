@@ -698,7 +698,7 @@ The average silhouette width for each cluster provides insights into the quality
 
 -   With a high average silhouette width, this cluster demonstrates excellent separation and cohesion among its observations. The high silhouette width indicates that the observations within this cluster are very well-matched to their own cluster and are clearly distinct from observations in other clusters.
 
-## **II. Davies-Bouldin Index**
+## **III. Davies-Bouldin Index**
 
 This internal evaluation scheme compares intra-cluster variation or scatter with inter-cluster separation. A lower index value indicates a better clustering result, yet a 'good value' returned by this index does not necessarily represent a good information representation.
 
