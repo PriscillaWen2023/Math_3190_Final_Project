@@ -607,7 +607,7 @@ cluster_profiles2 <- aggregate(data_clusters2[, -7], by = list(cluster = cluster
 cluster_profiles2
 ```
 
-3 Clusters (without outlier):
+4 Clusters (without outlier):
 
 -   Cluster 1 contains 16 observations: 1, 12, 9, 19, 7, 11, 2, 4, 21, 8, 20, 3, 5, 17, 22, 18
 
