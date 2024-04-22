@@ -40,11 +40,11 @@ An example given by Steve Oudot concerning the problem of the scale of data: thi
 
 ![*Clustering based on single-linkage produces a dendogram revealing relevant scale*](A-B_planar_point_Hierarchical_Cluster.jpg)
 
-Each visual point in the image occupies its own cluster at the lowest scale (from about 0 to 5), each $B$ is a cluster at the middle level, and the final level above the last merge is the entire $A$ (in the divisive context, one might suppose the first split represents the two halves or legs of the $A$). The hierarchy of scale, or of some innate linear hierarchy, is well represented by hierarchical clustering. Indeed this is a key benefit of hierarchical clustering compared to $K$-Means clustering. $K$-means requires a $k$ number of clusters to be specified and initial cluster centers to be assigned, to which the algorithm is sensitive: as $k$ is changed the clusters change in arbitrary ways, whereas hierarchical clustering does not require either of these. $K$-means does not provide any linear ordering of cluster objects, whereas this is emergent property of the clustering hierarchy (Hastie et al., 2009, pg. 514)
+Each visual point in the image occupies its own cluster at the lowest scale (from about 0 to 5), each $B$ is a cluster at the middle level, and the final level above the last merge is the entire $A$ (in the divisive context, one might suppose the first split represents the two halves or legs of the $A$). The hierarchy of scale, or of some innate linear hierarchy, is well represented by hierarchical clustering. Indeed this is a key benefit of hierarchical clustering compared to $K$-Means clustering. $K$-means requires a $k$ number of clusters to be specified and initial cluster centers to be assigned, to which the algorithm is sensitive: as $k$ is changed the clusters change in arbitrary ways, whereas hierarchical clustering does not require either of these. $K$-means does not provide any linear ordering of cluster objects, whereas this is emergent property of the clustering hierarchy (Hastie et al., 2009, pg. 514). Hierarchical clustering is usefully applied for naturally grouped data, especially where a taxonomic structure may be recognizable.
 
 ## Background
 
-Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (Hastie et al., 2009, pg. 486). Both types of algorithm ***divide a data set into a sequence of nested partitions*** (Gan, 2007, pg. 109). They both are also subject to some of the same drawbacks:
+Divisive or 'top-down' clustering algorithms have, by the past, been studied less extensively than bottom-up or agglomerative clustering (Hastie et al., 2009, pg. 486). Both types of algorithm ***divide a data set** into a sequence of **nested** partitions* (Gan, 2007, pg. 109). They both are also subject to some of the same drawbacks:
 
 -   data points which were split at an early phase will not be reallocated later
 -   various dissimilarity measures lead to differing hierarchies
@@ -264,7 +264,7 @@ table(cluster_assignments)
 # **Dendrogram**
 
 \
-The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into the hierarchical structure of the data and help in determining the optimal number of clusters.
+The most common diagnostic measure in hierarchical clustering is arguably the dendrogram visualization. Dendrograms provide a graphical representation of the clustering process, showing how clusters merge or split at each step. They are widely used because they offer intuitive insights into a hierarchical structure of the data and help in determining an optimal number of clusters or meaningful 'levels' of dat.
 
 ## RShiny App : Reactive Dendrogram
 
@@ -697,6 +697,54 @@ The average silhouette width for each cluster provides insights into the quality
 **(4) Cluster 4 (2 observation, average silhouette width: 0.79):**
 
 -   With a high average silhouette width, this cluster demonstrates excellent separation and cohesion among its observations. The high silhouette width indicates that the observations within this cluster are very well-matched to their own cluster and are clearly distinct from observations in other clusters.
+
+## **II. Davies-Bouldin Index**
+
+This internal evaluation scheme compares intra-cluster variation or scatter with inter-cluster separation. A lower index value indicates a better clustering result, yet a 'good value' returned by this index does not necessarily represent a good information representation.
+
+First, we calculate the average distance of feature vectors $X_j$ in an $i^{th}$ cluster from the centroid $A_i$ of said cluster, where $T_i$ is the size of this $i^{th}$ cluster:
+
+$$
+S_i = (\dfrac{1}{T_i} \sum_{k=1}^{T_i}||X_j-A_i||_q^p)^{1/q}
+$$
+
+Here if $q=1$ then indeed it is the distance to the centroid, and usually $p=2$ , for a $2$-norm in euclidean distance. Other distance metrics of course may be used in the case of higher-dimensional data.
+
+Then a measure of cluster separation is calculated (with $a_{k,i}$ being the $k_{th}$ element of $A_i$, if the centroid contains $n$ such elements, were $A_i$ an $n$-dimensional centroid):
+
+$$
+M_{i,j}=||A_i-Aj||_p=(\sum_{k=1}^{n}|a_{k,i}-a_{k,j}|^p)^{1/p}
+$$
+
+Then the Davies-Bouldin conditions define $R_{i,j}$ as a measure of how good or how 'tight' a clustering scheme is by the following :
+
+1.   $R_{i,j} \geq 0$
+
+2.  $R_{i,j}=R_{j,i}$
+
+3.  When $S_j \geq S_k$ and $M_{i,j} = M_{i,k}$ then clustering schemes $R_{i,j} > R_{i,k}$
+
+4.  When $S_j = S_k$ and $M_{i,j} \leq M_{i,k}$ then $R_{i,j} > R_{i,k}$
+
+Where $R_{i,j}$ should be as small so as to account for the separation $M_{i,j}$ among $i^{th}$ and $j^{th}$ clusters, ideally a large value in the denominator. Then a solution that satisfies these conditions is:
+
+$$
+R_{i,j}=\dfrac{S_i + S_j}{M_{i,j}}
+$$
+
+Which is then used to define $D_i$, a 'worst-case' value :
+
+$$
+D_i \equiv \max_{j\neq i}\{R_{i,j}\}
+$$
+
+And where $N$ is the number of clusters, the Davies-Bouldin index is:
+
+$$
+DB \equiv \dfrac{1}{N} \sum_{i=1}^{N}D_i
+$$
+
+The index thus represents an average over all the $i$ clusters. Plotting this against the number of clusters it is calculated over can be a good measure of deciding how many clusters exist, or where to restrict splits. This index can be improved (that is, the value lowered) by increasing inter-cluster separation and intra-cluster cohesion.
 
 # Completing Analysis
 
