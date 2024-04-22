@@ -485,7 +485,7 @@ plot(best_hc_colored, main = "Dendrogram obtained by dissimilarity based on eucl
 
 -   **Compare Results**: Compare dendrograms generated with different parameter settings to identify the most stable and meaningful clustering solution.
 
-```{r dendrogram2, echo = T, eval = F, warning=F, message = F}
+```{r dendrogram2, echo = T, eval = T, warning=F, message = F}
 # Perform hierarchical clustering with the chosen parameters
 best_hc <- diana(dist(data_new, method = "euclidean"))
 
@@ -499,7 +499,7 @@ plot(as.dendrogram(best_hc), main = "Dendrogram with euclidean distance",
 rect.hclust(best_hc, k = 3, border = 2:4)  # Highlight clusters
 ```
 
-```{r cluster_profiles, echo = T, eval = F, warning=F, message = F}
+```{r cluster_profiles, echo = T, eval = T, warning=F, message = F}
 
 # Cut the dendrogram to get a restricted number clusters
 clusters <- cutree(best_hc, k = 3)  # Using 3 clusters
