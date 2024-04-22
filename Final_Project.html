@@ -634,16 +634,18 @@ sensitive: as <span class="math inline">\(k\)</span> is changed the
 clusters change in arbitrary ways, whereas hierarchical clustering does
 not require either of these. <span class="math inline">\(K\)</span>-means does not provide any linear
 ordering of cluster objects, whereas this is emergent property of the
-clustering hierarchy (Hastie et al., 2009, pg. 514)</p>
+clustering hierarchy (Hastie et al., 2009, pg. 514). Hierarchical
+clustering is usefully applied for naturally grouped data, especially
+where a taxonomic structure may be recognizable.</p>
 </div>
 <div id="background" class="section level2">
 <h2>Background</h2>
 <p>Divisive or ‘top-down’ clustering algorithms have, by the past, been
 studied less extensively than bottom-up or agglomerative clustering
 (Hastie et al., 2009, pg. 486). Both types of algorithm
-<strong><em>divide a data set into a sequence of nested
-partitions</em></strong> (Gan, 2007, pg. 109). They both are also
-subject to some of the same drawbacks:</p>
+<em><strong>divide a data set</strong> into a sequence of
+<strong>nested</strong> partitions</em> (Gan, 2007, pg. 109). They both
+are also subject to some of the same drawbacks:</p>
 <ul>
 <li>data points which were split at an early phase will not be
 reallocated later</li>
@@ -676,8 +678,8 @@ would seem that finding an ‘optimal’ bipartition is NP-hard (Gan,
 2007).</p>
 </div>
 </div>
-<div id="diana---divisive-hierarchical-clustering" class="section level1">
-<h1>DIANA - Divisive Hierarchical Clustering</h1>
+<div id="a.-diana---divisive-hierarchical-clustering" class="section level1">
+<h1>A. DIANA - Divisive Hierarchical Clustering</h1>
 <p>Commonly known by its moniker ‘DIANA’ in the field data analytics,
 this popular divisive hierarchical cluster algorithm proceeds in such a
 manner: a series of successive splits operated over the cluster of
@@ -962,7 +964,7 @@ library(stats)
 library(kableExtra)
 
 # Read the Studio Ghibli dataset from URL
-url &lt;- &quot;https://github.com/cham24/Math_3190_Final_Project/raw/main/Studio%20Ghibli%20%5Bnew%5D.csv&quot;
+url &lt;- &quot;https://raw.githubusercontent.com/cham24/Math_3190_Final_Project/main/datasets_for_testing/Studio%20Ghibli%20%5Bnew%5D.csv&quot;
 data &lt;- read.csv(url, header = TRUE)
 
 # Remove rows with missing values and select specific columns
@@ -1064,6 +1066,30 @@ print(cluster_assignments)</code></pre>
 ## 16  2  1  4</code></pre>
 </div>
 </div>
+<div id="b.-dismea" class="section level1">
+<h1>B. DISMEA</h1>
+<p>This divisive method uses the <span class="math inline">\(k\)</span>-means algorithm to subdivide a cluster
+into two. This method produces an <span class="math inline">\(n\)</span>
+level hierarchy where <span class="math inline">\(n\)</span> is also the
+size of the given data set. Similar to DIANA, the algorithm begins with
+the entire data set as a single cluster <span class="math inline">\(C\)</span> and at each step it splits the cluster
+with the largest sum of squared distances (SSD). This means that a
+maximum number of clusters <span class="math inline">\(k_{max}(\leq
+n)\)</span> is specified in the DISMEA algorithm. (Gan, 2007).</p>
+</div>
+<div id="c.-edwards-cavalli-sforza" class="section level1">
+<h1>C. Edwards &amp; Cavalli-Sforza</h1>
+<p>This hierarchical divisive algorithm splits observations into two
+groups by maximizing the <em>between-cluster</em> sum of squares. The
+<em>within-cluster sum of squares</em> (WSS) divided by the number of
+points (the variance of the cluster) represents cluster density. This
+algorithm splits the initial cluster into two by enumerating all
+possible bipartitions and minimizing the WSS at that split level. In
+this algorithm, the best partition may not be unique in some cases.
+Another problem is that the initial computation requires an evaluation
+of all <span class="math inline">\(2^{n-1}-1\)</span> possible
+splits</p>
+</div>
 <div id="dendrogram" class="section level1">
 <h1><strong>Dendrogram</strong></h1>
 <p><br />
@@ -1071,13 +1097,21 @@ The most common diagnostic measure in hierarchical clustering is
 arguably the dendrogram visualization. Dendrograms provide a graphical
 representation of the clustering process, showing how clusters merge or
 split at each step. They are widely used because they offer intuitive
-insights into the hierarchical structure of the data and help in
-determining the optimal number of clusters.</p>
+insights into a hierarchical structure of the data and help in
+determining an optimal number of clusters or meaningful ‘levels’ of
+dat.</p>
 <div id="rshiny-app-reactive-dendrogram" class="section level2">
 <h2>RShiny App : Reactive Dendrogram</h2>
-<pre class="r"><code>library(shiny)
-library(shinydashboard)
-library(cluster)
+<pre class="r"><code># Dendogram Viewer v.2
+
+library(shiny)
+library(shinydashboard)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;shinydashboard&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:graphics&#39;:
+## 
+##     box</code></pre>
+<pre class="r"><code>library(cluster)  
 
 ui &lt;- dashboardPage(
   dashboardHeader(title = &quot;Dendrogram Viewer&quot;),
@@ -1086,13 +1120,12 @@ ui &lt;- dashboardPage(
     selectInput(&quot;numColumns&quot;, &quot;Select numeric columns for clustering&quot;,
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput(&quot;distanceType&quot;, &quot;Select Distance Type&quot;,
-                choices = c(&quot;euclidean&quot;, &quot;manhattan&quot;, &quot;minkowski&quot;), selected = &quot;euclidean&quot;),
+                choices = c(&quot;euclidean&quot;, &quot;manhattan&quot;, &quot;minkowski&quot;, &quot;canberra&quot;, &quot;binary&quot;, &quot;maximum&quot;), selected = &quot;euclidean&quot;),
     sliderInput(&quot;numClusters&quot;, &quot;Number of Clusters:&quot;, min = 2, max = 10, value = 3),
     actionButton(&quot;update&quot;, &quot;Update Selection&quot;)
   ),
   dashboardBody(
-    plotOutput(&quot;dendrogramPlot&quot;),
-    verbatimTextOutput(&quot;fileInfo&quot;)
+    plotOutput(&quot;dendrogramPlot&quot;, height = &quot;90vh&quot;)  
   )
 )
 
@@ -1102,20 +1135,16 @@ server &lt;- function(input, output, session) {
     if (is.null(inFile)) {
       return(NULL)
     }
+    # df &lt;- 
     read.csv(inFile$datapath, na.strings = c(&quot;NA&quot;, &quot;na&quot;, &quot;&quot;))
+    # row.names(df) &lt;- df$Name
+    # df[, !(names(df) %in% c(&quot;Name&quot;))]  
   })
   
   observe({
     df &lt;- data()
-    updateSelectInput(session, &quot;numColumns&quot;, choices = names(df)[sapply(df, is.numeric)])
-  })
-
-  output$fileInfo &lt;- renderPrint({
-    df &lt;- data()
-    if (is.null(df)) {
-      &quot;No file uploaded.&quot;
-    } else {
-      summary(df)
+    if (!is.null(df)) {
+      updateSelectInput(session, &quot;numColumns&quot;, choices = names(df)[sapply(df, is.numeric)])
     }
   })
 
@@ -1146,42 +1175,74 @@ server &lt;- function(input, output, session) {
     if (!is.null(dist_matrix)) {
       diana_clust &lt;- diana(dist_matrix)
       clusters &lt;- cutree(diana_clust, k = input$numClusters)
-      plot(diana_clust, labels = clusters, main = &quot;Dendrogram of Divisive Hierarchical Clustering&quot;)
-      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:6)
+      plot(diana_clust, labels = df[,1], main = &quot;Dendrogram of Divisive Hierarchical Clustering&quot;)
+      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:8)
     }
   })
 }
 
 shinyApp(ui, server)</code></pre>
+<pre><code>## 
+## Listening on http://127.0.0.1:7374</code></pre>
+<p><img src="data:image/png;base64,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AChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5DZ2dnZ0v9kkAALyQjAABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5/x8uc8zhsf5eKQAAAABJRU5ErkJggg==" width="576" /></p>
 </div>
 </div>
 <div id="diagnostic-and-remedial-measures" class="section level1">
 <h1>Diagnostic and Remedial Measures</h1>
 <div id="i.-cophenetic-distance-correlation" class="section level2">
 <h2>I. Cophenetic Distance &amp; Correlation</h2>
-<p>TO-DO : give explanation/definition of cophenetic distance</p>
-<p><strong><em>Cophenetic correlation</em></strong> is a statistic
-representing how well a dendrogram preserves the pairwise distances
-between data points. It assesses the fidelity of a hierarchical
-clustering solution by comparing the distances in the original data
-space with the distances represented by the dendrogram. A high
-cophenetic correlation indicates that the dendrogram accurately
-represents the underlying pairwise distances between data points.</p>
+<p>The <strong><em>cophenetic correlation coefficient</em></strong> is a
+statistic representing how well a dendrogram preserves the pairwise
+distances between data points. It is the correlation between the <span class="math inline">\(2^{|n|-1}-1\)</span> pairwise dissimilarities from
+the proximity matrix evaluated by the algorithm and their corresponding
+<em>cophenetic dissimilarities</em> (or ‘distance’)derived from the
+dendogram. The fidelity of a hierarchical clustering solution is
+assessed by comparing the distances in the original data space with the
+distances represented by the dendrogram. A high cophenetic correlation
+indicates that the dendrogram accurately represents the underlying
+pairwise distances between data points. This, however, is not as well
+defined, or rather not directly applied, in the divisive case. Rather
+than merging, clusters are divided based on a splitting criterion. Thus
+other, alternative measures are also employed such as <em>intra-cluster
+variation</em>, the <em>silhouette coefficient</em>, or the <em>Davies
+Bouldin</em> index which compares average intra-cluster varition to the
+inter-cluster separation.</p>
 <p><strong>(1) Compute the Original Pairwise Distances</strong>: Start
 by calculating the pairwise distances between all data points in the
 original dataset using an appropriate distance metric (e.g., Euclidean
 distance, Manhattan distance, etc.).</p>
 <p><strong>(2) Compute Cophenetic Distances</strong>: For each pair of
-data points, calculate the cophenetic distance, which is the height at
-which the two points are first merged into the same cluster in the
-dendrogram.</p>
+data points, calculate the cophenetic dissimilarity or distance <span class="math inline">\(c_{ij}\)</span>: the height at which the two
+points are first merged into the same cluster in the dendrogram. This
+is, in other words, “the intergroup dissimilarity at which observations
+<span class="math inline">\(i\)</span> and <span class="math inline">\(i&#39;\)</span> are first joined together in the
+same cluster” (Hastie et al. 2009, pg. 522) in the agglomerative case.
+In the divisive case, where the nodes represent clusters at each
+splitting level, their positions are based on the ‘distance’ or
+dissimilarity between the clusters formed at each split.</p>
+<p>This is considered a “very restrictive” dissimilarity measure as
+<span class="math inline">\(c_{ij}\)</span> over the observations must
+contain many ‘ties’ or links, since only <span class="math inline">\(n-1\)</span> (number of splits) of the total <span class="math inline">\(2^{|n|-1}-1\)</span> dissimilarity values can be
+distinct (Hastie et al. 2009, pg. 522). For any three dissimilarity
+values <span class="math inline">\(i, j, k\)</span>, they conform to the
+‘ultrametric inequality’:</p>
+<p><span class="math display">\[
+c_{ij} \leq \max\{c_{ik}, c_{jk}\}
+\]</span></p>
+<p>Where, say in Euclidean space, these are points with Euclidean
+coordinates and the set of interpoint distances form an isosceles
+triangle for all triples of points with the unequal length no longer
+than the length of the two equal sides (Hastie et al. 2009, pg. 523).
+Thus general dissimilarities in arbitrary data sets do not truly
+resemble the cophenetic dissimilarities and the dendrogram is best
+understood as a clustering structure imposed by the algorithm.</p>
 <p><strong>(3) Compute Cophenetic Correlation</strong>: Once you have
 the original pairwise distances and the corresponding cophenetic
 distances, calculate the correlation coefficient between these two sets
-of distances. This correlation coefficient is the cophenetic
-correlation.</p>
-<p>Mathematically, the cophenetic correlation <span class="math inline">\(c\)</span> is computed using the following
-formula:</p>
+of distances.</p>
+<p>The cophenetic correlation <span class="math inline">\(c\)</span> is
+computed using the following formula, the sum of a product of
+differences divided by its norm:</p>
 <p><span class="math display">\[c = \frac{\sum_{i &lt; j}(d_{ij} -
 \bar{d})(c_{ij} - \bar{c})}{\sqrt{\sum_{i &lt; j}(d_{ij} - \bar{d})^2
 \sum_{i &lt; j}(c_{ij} - \bar{c})^2}}\]</span></p>
@@ -1191,7 +1252,8 @@ formula:</p>
 pairwise distance between data points <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</p></li>
 <li><p><span class="math inline">\(c_{ij}\)</span> is the cophenetic
 distance between data points <span class="math inline">\(i\)</span> and
-<span class="math inline">\(j\)</span> in the dendrogram.</p></li>
+<span class="math inline">\(j\)</span> in the dendrogram, the height of
+their splitting node.</p></li>
 <li><p><span class="math inline">\(\bar{d}\)</span> is the mean of the
 original pairwise distances.</p></li>
 <li><p><span class="math inline">\(\bar{c}\)</span> is the mean of the
@@ -1291,19 +1353,20 @@ on the nature of the data and the clustering objectives.</p></li>
 </ul>
 <p><strong>(4) Identifying Inconsistencies:</strong></p>
 <ul>
-<li><p><strong>Inconsistent Merging</strong>: Look for instances where
-clusters are merged at varying distances. Inconsistent merging may
+<li><p><strong>Inconsistent Splitting</strong>: Look for instances where
+clusters are split at varying distances. Inconsistent splitting may
 indicate suboptimal clustering or noisy data.</p></li>
-<li><p><strong>Abnormal Patterns</strong>: Watch out for abnormal
-patterns such as clusters merging and then splitting again shortly
-afterward. These patterns may suggest errors in the clustering process
-or the presence of outliers.</p></li>
+<li><p><strong>Abnormal Patterns</strong>: More apt in the case of
+agglomerative clustering: watch out for abnormal patterns such as
+clusters splitting and then merging shortly afterward. These patterns
+may suggest errors in the clustering process or the presence of
+outliers.</p></li>
 </ul>
 <p><strong>(5) Iterative Refinement:</strong></p>
 <ul>
 <li><p><strong>Experiment with Parameters</strong>: Adjust clustering
-parameters such as distance metrics or linkage methods and observe the
-changes in the dendrogram structure.</p></li>
+parameters such as distance metrics and observe the changes in the
+dendrogram structure.</p></li>
 <li><p><strong>Compare Results</strong>: Compare dendrograms generated
 with different parameter settings to identify the most stable and
 meaningful clustering solution.</p></li>
@@ -1475,7 +1538,7 @@ cluster_profiles2</code></pre>
 ## 2 106.500
 ## 3 344.500
 ## 4 440.500</code></pre>
-<p>3 Clusters (without outlier):</p>
+<p>4 Clusters (without outlier):</p>
 <ul>
 <li><p>Cluster 1 contains 16 observations: 1, 12, 9, 19, 7, 11, 2, 4,
 21, 8, 20, 3, 5, 17, 22, 18</p></li>
@@ -1509,17 +1572,26 @@ that cluster. Let the minimum of these distances be denoted as <span class="math
 <p><span class="math display">\[
 s_i=\frac{b_i - a_i}{max(a_i, b_i)}
 \]</span></p>
+<ul>
+<li><p><span class="math inline">\(s_i​\)</span> represents the
+Silhouette Coefficient for data point <span class="math inline">\(i\)</span>.</p></li>
+<li><p><span class="math inline">\(a_i\)</span>​ represents the average
+distance from <span class="math inline">\(i\)</span> to all other points
+in the same cluster.</p></li>
+<li><p><span class="math inline">\(b_i\)</span>​ represents the minimum
+average distance from <span class="math inline">\(i\)</span> to all
+points in neighboring clusters.</p></li>
+</ul>
 <ol start="4" style="list-style-type: decimal">
-<li><p>Repeat steps (1)-(3) for all data points.</p></li>
-<li><p>Finally, compute the overall Silhouette Coefficient as the mean
-of all <span class="math inline">\(s_i\)</span>​ values.</p></li>
+<li>Repeat steps (1)-(3) for all data points.</li>
+<li>Finally, compute the overall Silhouette Coefficient as the mean of
+all <span class="math inline">\(s_i\)</span>​ values.</li>
 </ol>
-<p><span class="math inline">\(s_i​\)</span> represents the Silhouette
-Coefficient for data point <span class="math inline">\(i\)</span>, <span class="math inline">\(a_i\)</span>​ represents the average distance from
-<span class="math inline">\(i\)</span> to all other points in the same
-cluster, and <span class="math inline">\(b_i\)</span>​ represents the
-minimum average distance from <span class="math inline">\(i\)</span> to
-all points in neighboring clusters.</p>
+<p><span class="math inline">\(\text{Overall Silhouette Coefficient} =
+\frac{1}{N} \sum_{i=1}^{N} s_i\)</span></p>
+<ul>
+<li>N is the total number of data points.</li>
+</ul>
 <pre class="r"><code>library(cluster)
 
 # Compute silhouette scores
@@ -1611,6 +1683,54 @@ silhouette width indicates that the observations within this cluster are
 very well-matched to their own cluster and are clearly distinct from
 observations in other clusters.</li>
 </ul>
+</div>
+<div id="iii.-davies-bouldin-index" class="section level2">
+<h2><strong>III. Davies-Bouldin Index</strong></h2>
+<p>This internal evaluation scheme compares intra-cluster variation or
+scatter with inter-cluster separation. A lower index value indicates a
+better clustering result, yet a ‘good value’ returned by this index does
+not necessarily represent a good information representation.</p>
+<p>First, we calculate the average distance of feature vectors <span class="math inline">\(X_j\)</span> in an <span class="math inline">\(i^{th}\)</span> cluster from the centroid <span class="math inline">\(A_i\)</span> of said cluster, where <span class="math inline">\(T_i\)</span> is the size of this <span class="math inline">\(i^{th}\)</span> cluster:</p>
+<p><span class="math display">\[
+S_i = (\dfrac{1}{T_i} \sum_{k=1}^{T_i}||X_j-A_i||_q^p)^{1/q}
+\]</span></p>
+<p>Here if <span class="math inline">\(q=1\)</span> then indeed it is
+the distance to the centroid, and usually <span class="math inline">\(p=2\)</span> , for a <span class="math inline">\(2\)</span>-norm in euclidean distance. Other
+distance metrics of course may be used in the case of higher-dimensional
+data.</p>
+<p>Then a measure of cluster separation is calculated (with <span class="math inline">\(a_{k,i}\)</span> being the <span class="math inline">\(k_{th}\)</span> element of <span class="math inline">\(A_i\)</span>, if the centroid contains <span class="math inline">\(n\)</span> such elements, were <span class="math inline">\(A_i\)</span> an <span class="math inline">\(n\)</span>-dimensional centroid):</p>
+<p><span class="math display">\[
+M_{i,j}=||A_i-Aj||_p=(\sum_{k=1}^{n}|a_{k,i}-a_{k,j}|^p)^{1/p}
+\]</span></p>
+<p>Then the Davies-Bouldin conditions define <span class="math inline">\(R_{i,j}\)</span> as a measure of how good or how
+‘tight’ a clustering scheme is by the following :</p>
+<ol style="list-style-type: decimal">
+<li><p><span class="math inline">\(R_{i,j} \geq 0\)</span></p></li>
+<li><p><span class="math inline">\(R_{i,j}=R_{j,i}\)</span></p></li>
+<li><p>When <span class="math inline">\(S_j \geq S_k\)</span> and <span class="math inline">\(M_{i,j} = M_{i,k}\)</span> then clustering schemes
+<span class="math inline">\(R_{i,j} &gt; R_{i,k}\)</span></p></li>
+<li><p>When <span class="math inline">\(S_j = S_k\)</span> and <span class="math inline">\(M_{i,j} \leq M_{i,k}\)</span> then <span class="math inline">\(R_{i,j} &gt; R_{i,k}\)</span></p></li>
+</ol>
+<p>Where <span class="math inline">\(R_{i,j}\)</span> should be as small
+so as to account for the separation <span class="math inline">\(M_{i,j}\)</span> among <span class="math inline">\(i^{th}\)</span> and <span class="math inline">\(j^{th}\)</span> clusters, ideally a large value in
+the denominator. Then a solution that satisfies these conditions is:</p>
+<p><span class="math display">\[
+R_{i,j}=\dfrac{S_i + S_j}{M_{i,j}}
+\]</span></p>
+<p>Which is then used to define <span class="math inline">\(D_i\)</span>, a ‘worst-case’ value :</p>
+<p><span class="math display">\[
+D_i \equiv \max_{j\neq i}\{R_{i,j}\}
+\]</span></p>
+<p>And where <span class="math inline">\(N\)</span> is the number of
+clusters, the Davies-Bouldin index is:</p>
+<p><span class="math display">\[
+DB \equiv \dfrac{1}{N} \sum_{i=1}^{N}D_i
+\]</span></p>
+<p>The index thus represents an average over all the <span class="math inline">\(i\)</span> clusters. Plotting this against the
+number of clusters it is calculated over can be a good measure of
+deciding how many clusters exist, or where to restrict splits. This
+index can be improved (that is, the value lowered) by increasing
+inter-cluster separation and intra-cluster cohesion (Davies, 1979).</p>
 </div>
 </div>
 <div id="completing-analysis" class="section level1">
@@ -1751,6 +1871,9 @@ Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining
 and Knowledge Discovery, 1(1), 14-23.</p></li>
 <li><p>Murtagh, F. (2011). On ultrametricity, data coding, and
 computation. Journal of Classification, 28(3), 326-347.</p></li>
+<li><p>Davies, David L., Bouldin, Donald W., (1979). A Cluster
+Separation Measure. IEEE Transactions on Pattern Analysis and Machine
+Intelligence. PAMI-1 (2): 224-227.</p></li>
 <li><p>R Development Core Team (2021). R: A language and environment for
 statistical computing. R Foundation for Statistical Computing.</p></li>
 <li><p>Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the
@@ -1763,6 +1886,87 @@ the Royal Statistical Society: Series B (Statistical Methodology),
 </ul>
 <div id="footnote-agglomerative-clustering-r-shiny-app" class="section level4">
 <h4>Footnote: Agglomerative Clustering R Shiny App</h4>
+</div>
+<div id="footnote-divisive-clustering-r-shiny-app-diana" class="section level4">
+<h4>Footnote: Divisive Clustering R Shiny App (DIANA)</h4>
+<pre class="r"><code># Dendogram Viewer v.2
+
+library(shiny)
+library(shinydashboard)
+library(cluster)  
+
+ui &lt;- dashboardPage(
+  dashboardHeader(title = &quot;Dendrogram Viewer&quot;),
+  dashboardSidebar(
+    fileInput(&quot;dataFile&quot;, &quot;Upload dataset&quot;, accept = &quot;.csv&quot;),
+    selectInput(&quot;numColumns&quot;, &quot;Select numeric columns for clustering&quot;,
+                choices = NULL, selected = NULL, multiple = TRUE),
+    selectInput(&quot;distanceType&quot;, &quot;Select Distance Type&quot;,
+                choices = c(&quot;euclidean&quot;, &quot;manhattan&quot;, &quot;minkowski&quot;, &quot;canberra&quot;, &quot;binary&quot;, &quot;maximum&quot;), selected = &quot;euclidean&quot;),
+    sliderInput(&quot;numClusters&quot;, &quot;Number of Clusters:&quot;, min = 2, max = 10, value = 3),
+    actionButton(&quot;update&quot;, &quot;Update Selection&quot;)
+  ),
+  dashboardBody(
+    plotOutput(&quot;dendrogramPlot&quot;, height = &quot;90vh&quot;)  
+  )
+)
+
+server &lt;- function(input, output, session) {
+  data &lt;- reactive({
+    inFile &lt;- input$dataFile
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    # df &lt;- 
+    read.csv(inFile$datapath, na.strings = c(&quot;NA&quot;, &quot;na&quot;, &quot;&quot;))
+    # row.names(df) &lt;- df$Name
+    # df[, !(names(df) %in% c(&quot;Name&quot;))]  
+  })
+  
+  observe({
+    df &lt;- data()
+    if (!is.null(df)) {
+      updateSelectInput(session, &quot;numColumns&quot;, choices = names(df)[sapply(df, is.numeric)])
+    }
+  })
+
+  output$dendrogramPlot &lt;- renderPlot({
+    req(input$update)
+    df &lt;- data()
+    if (is.null(df) || is.null(input$numColumns)) {
+      return()
+    }
+    clean_data &lt;- df[, input$numColumns]
+    clean_data &lt;- apply(clean_data, 2, function(column) {
+      if (any(is.na(column))) {
+        column[is.na(column)] &lt;- mean(column, na.rm = TRUE)
+      }
+      return(column)
+    })
+
+    dist_matrix &lt;- tryCatch({
+      dist(clean_data, method = input$distanceType)
+    }, warning = function(w) {
+      cat(&quot;Warning: &quot;, w$message, &quot;\n&quot;)
+      return(NULL)
+    }, error = function(e) {
+      cat(&quot;Error: &quot;, e$message, &quot;\n&quot;)
+      return(NULL)
+    })
+
+    if (!is.null(dist_matrix)) {
+      diana_clust &lt;- diana(dist_matrix)
+      clusters &lt;- cutree(diana_clust, k = input$numClusters)
+      plot(diana_clust, labels = df[,1], main = &quot;Dendrogram of Divisive Hierarchical Clustering&quot;)
+      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:8)
+    }
+  })
+}
+
+shinyApp(ui, server)</code></pre>
+<pre><code>## 
+## Listening on http://127.0.0.1:6816</code></pre>
+<p><img src="data:image/png;base64,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AChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5DZ2dnZ0v9kkAALyQjAABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5/x8uc8zhsf5eKQAAAABJRU5ErkJggg==" width="576" /></p>
 </div>
 </div>
 
