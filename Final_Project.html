@@ -1727,10 +1727,10 @@ better clustering result, yet a ‘good value’ returned by this index does
 not necessarily represent a good information representation.</p>
 <p>First, we calculate the average distance of feature vectors <span class="math inline">\(X_j\)</span> in an <span class="math inline">\(i^{th}\)</span> cluster from the centroid <span class="math inline">\(A_i\)</span> of said cluster, where <span class="math inline">\(T_i\)</span> is the size of this <span class="math inline">\(i^{th}\)</span> cluster:</p>
 <p><span class="math display">\[
-S_i = (\dfrac{1}{T_i} \sum_{k=1}^{T_i}||X_j-A_i||_q^p)^{1/q}
+S_i = (\dfrac{1}{T_i} \sum_{k=1}^{T_i}||X_j-A_i||_p^q)^{1/q}
 \]</span></p>
-<p>Here if <span class="math inline">\(q=1\)</span> then indeed it is
-the distance to the centroid, and usually <span class="math inline">\(p=2\)</span> , for a <span class="math inline">\(2\)</span>-norm in euclidean distance. Other
+<p>Here, if <span class="math inline">\(q=1\)</span> then indeed it is
+the distance to the centroid, and usually <span class="math inline">\(p=2\)</span> , for a <span class="math inline">\(2\)</span>-norm, euclidean distance. Other
 distance metrics of course may be used in the case of higher-dimensional
 data.</p>
 <p>Then a measure of cluster separation is calculated (with <span class="math inline">\(a_{k,i}\)</span> being the <span class="math inline">\(k_{th}\)</span> element of <span class="math inline">\(A_i\)</span>, if the centroid contains <span class="math inline">\(n\)</span> such elements, were <span class="math inline">\(A_i\)</span> an <span class="math inline">\(n\)</span>-dimensional centroid):</p>
@@ -1922,86 +1922,8 @@ the Royal Statistical Society: Series B (Statistical Methodology),
 <div id="footnote-agglomerative-clustering-r-shiny-app" class="section level4">
 <h4>Footnote: Agglomerative Clustering R Shiny App</h4>
 </div>
-<div id="footnote-divisive-clustering-r-shiny-app-diana" class="section level4">
-<h4>Footnote: Divisive Clustering R Shiny App (DIANA)</h4>
-<pre class="r"><code># Dendogram Viewer v.2
-
-library(shiny)
-library(shinydashboard)
-library(cluster)  
-
-ui &lt;- dashboardPage(
-  dashboardHeader(title = &quot;Dendrogram Viewer&quot;),
-  dashboardSidebar(
-    fileInput(&quot;dataFile&quot;, &quot;Upload dataset&quot;, accept = &quot;.csv&quot;),
-    selectInput(&quot;numColumns&quot;, &quot;Select numeric columns for clustering&quot;,
-                choices = NULL, selected = NULL, multiple = TRUE),
-    selectInput(&quot;distanceType&quot;, &quot;Select Distance Type&quot;,
-                choices = c(&quot;euclidean&quot;, &quot;manhattan&quot;, &quot;minkowski&quot;, &quot;canberra&quot;, &quot;binary&quot;, &quot;maximum&quot;), selected = &quot;euclidean&quot;),
-    sliderInput(&quot;numClusters&quot;, &quot;Number of Clusters:&quot;, min = 2, max = 10, value = 3),
-    actionButton(&quot;update&quot;, &quot;Update Selection&quot;)
-  ),
-  dashboardBody(
-    plotOutput(&quot;dendrogramPlot&quot;, height = &quot;90vh&quot;)  
-  )
-)
-
-server &lt;- function(input, output, session) {
-  data &lt;- reactive({
-    inFile &lt;- input$dataFile
-    if (is.null(inFile)) {
-      return(NULL)
-    }
-    # df &lt;- 
-    read.csv(inFile$datapath, na.strings = c(&quot;NA&quot;, &quot;na&quot;, &quot;&quot;))
-    # row.names(df) &lt;- df$Name
-    # df[, !(names(df) %in% c(&quot;Name&quot;))]  
-  })
-  
-  observe({
-    df &lt;- data()
-    if (!is.null(df)) {
-      updateSelectInput(session, &quot;numColumns&quot;, choices = names(df)[sapply(df, is.numeric)])
-    }
-  })
-
-  output$dendrogramPlot &lt;- renderPlot({
-    req(input$update)
-    df &lt;- data()
-    if (is.null(df) || is.null(input$numColumns)) {
-      return()
-    }
-    clean_data &lt;- df[, input$numColumns]
-    clean_data &lt;- apply(clean_data, 2, function(column) {
-      if (any(is.na(column))) {
-        column[is.na(column)] &lt;- mean(column, na.rm = TRUE)
-      }
-      return(column)
-    })
-
-    dist_matrix &lt;- tryCatch({
-      dist(clean_data, method = input$distanceType)
-    }, warning = function(w) {
-      cat(&quot;Warning: &quot;, w$message, &quot;\n&quot;)
-      return(NULL)
-    }, error = function(e) {
-      cat(&quot;Error: &quot;, e$message, &quot;\n&quot;)
-      return(NULL)
-    })
-
-    if (!is.null(dist_matrix)) {
-      diana_clust &lt;- diana(dist_matrix)
-      clusters &lt;- cutree(diana_clust, k = input$numClusters)
-      plot(diana_clust, labels = df[,1], main = &quot;Dendrogram of Divisive Hierarchical Clustering&quot;)
-      rect.hclust(as.hclust(diana_clust), k = input$numClusters, border = 2:8)
-    }
-  })
-}
-
-shinyApp(ui, server)</code></pre>
-<pre><code>## 
-## Listening on http://127.0.0.1:6816</code></pre>
-<p><img src="data:image/png;base64,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AChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5DZ2dnZ0v9kkAALyQjAABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5AggAKEcAAQDlCCAAoBwBBACUI4AAgHIEEABQjgACAMoRQABAOQIIAChHAAEA5QggAKAcAQQAlCOAAIByBBAAUI4AAgDKEUAAQDkCCAAoRwABAOUIIACgHAEEAJQjgACAcgQQAFCOAAIAyhFAAEA5/x8uc8zhsf5eKQAAAABJRU5ErkJggg==" width="576" /></p>
+<div id="footnote-divisive-analysis-diana-clustering-r-shiny-app" class="section level4">
+<h4>Footnote: DIvisive ANAlysis (DIANA) Clustering R Shiny App</h4>
 </div>
 </div>
 
