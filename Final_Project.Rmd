@@ -874,9 +874,9 @@ library(shinydashboard)
 library(stats)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Dendrogram Viewer for Studio Ghibli Dataset"),
+  dashboardHeader(title = "Dendrogram Viewer"),
   dashboardSidebar(
-    fileInput("dataFile", "Upload your Studio Ghibli dataset", accept = ".csv"),
+    fileInput("dataFile", "Upload dataset", accept = ".csv"),
     selectInput("numColumns", "Select numeric columns for clustering",
                 choices = NULL, selected = NULL, multiple = TRUE),
     selectInput("distanceType", "Select Distance Type",
@@ -886,7 +886,7 @@ ui <- dashboardPage(
     actionButton("update", "Update Selection")
   ),
   dashboardBody(
-    plotOutput("dendrogramPlot"),
+    plotOutput("dendrogramPlot", height="90vh"),
     verbatimTextOutput("fileInfo")
   )
 )
@@ -949,9 +949,9 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-#### Footnote: Divisive Clustering R Shiny App (DIANA)
+#### Footnote: DIvisive ANAlysis (DIANA) Clustering R Shiny App
 
-```{r}
+```{r shiny_diana, echo = F, eval = F, message = F}
 # Dendogram Viewer v.2
 
 library(shiny)
