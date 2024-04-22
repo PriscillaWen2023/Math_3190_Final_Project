@@ -188,7 +188,7 @@ library(stats)
 library(kableExtra)
 
 # Read the Studio Ghibli dataset from URL
-url <- "https://github.com/cham24/Math_3190_Final_Project/raw/main/Studio%20Ghibli%20%5Bnew%5D.csv"
+url <- "https://raw.githubusercontent.com/cham24/Math_3190_Final_Project/main/datasets_for_testing/Studio%20Ghibli%20%5Bnew%5D.csv"
 data <- read.csv(url, header = TRUE)
 
 # Remove rows with missing values and select specific columns
