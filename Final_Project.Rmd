@@ -1,10 +1,10 @@
 ---
-title: "Final_Project"
+title: "Final_Project:_Divisive_Hierarchical_Clustering"
 author: "Cameron Chambers, Bram Stults, Priscilla Wen"
 date: "2024-04-02"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 header-includes: \usepackage{multirow}
 editor_options:
   chunk_output_type: inline
