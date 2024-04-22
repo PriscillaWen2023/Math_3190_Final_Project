@@ -3,8 +3,8 @@ title: "Final_Project:_Divisive_Hierarchical_Clustering"
 author: "Cameron Chambers, Bram Stults, Priscilla Wen"
 date: "2024-04-02"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 header-includes: \usepackage{multirow}
 editor_options:
   chunk_output_type: inline
@@ -261,7 +261,7 @@ table(cluster_assignments)
 
 ```
 
-# B. DISMEA 
+# B. DISMEA
 
 This divisive method uses the $k$-means algorithm to subdivide a cluster into two. This method produces an $n$ level hierarchy where $n$ is also the size of the given data set. Similar to DIANA, the algorithm begins with the entire data set as a single cluster $C$ and at each step it splits the cluster with the largest sum of squared distances (SSD). This means that a maximum number of clusters $k_{max}(\leq n)$ is specified in the DISMEA algorithm. (Gan, 2007).
 
@@ -713,10 +713,10 @@ This internal evaluation scheme compares intra-cluster variation or scatter with
 First, we calculate the average distance of feature vectors $X_j$ in an $i^{th}$ cluster from the centroid $A_i$ of said cluster, where $T_i$ is the size of this $i^{th}$ cluster:
 
 $$
-S_i = (\dfrac{1}{T_i} \sum_{k=1}^{T_i}||X_j-A_i||_q^p)^{1/q}
+S_i = (\dfrac{1}{T_i} \sum_{k=1}^{T_i}||X_j-A_i||_p^q)^{1/q}
 $$
 
-Here if $q=1$ then indeed it is the distance to the centroid, and usually $p=2$ , for a $2$-norm in euclidean distance. Other distance metrics of course may be used in the case of higher-dimensional data.
+Here, if $q=1$ then indeed it is the distance to the centroid, and usually $p=2$ , for a $2$-norm, euclidean distance. Other distance metrics of course may be used in the case of higher-dimensional data.
 
 Then a measure of cluster separation is calculated (with $a_{k,i}$ being the $k_{th}$ element of $A_i$, if the centroid contains $n$ such elements, were $A_i$ an $n$-dimensional centroid):
 
@@ -726,7 +726,7 @@ $$
 
 Then the Davies-Bouldin conditions define $R_{i,j}$ as a measure of how good or how 'tight' a clustering scheme is by the following :
 
-1.   $R_{i,j} \geq 0$
+1.  $R_{i,j} \geq 0$
 
 2.  $R_{i,j}=R_{j,i}$
 
