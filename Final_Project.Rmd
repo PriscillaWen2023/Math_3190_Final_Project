@@ -60,7 +60,7 @@ Moreover, divisive hierarchical clustering is *monotone*. At each level (dependi
 
 The totality of data, a single cluster composed of $n$-objects, is gradually split at each lower level into smaller clusters. Each cluster's "internal" dissimilarity diminishes, while the total number of clusters increases, following some criteria. A final hierarchy partitions each individual observation in its own, isolated 'cluster' at the lowest level, entirely 'similar' to itself. This divisive hierarchy then is formed in $n-1$ (potential) steps, with $2^{|n|-1}-1$ non-trivial possibilities to split data into two, a very large number of possible partitions. It would seem that finding an 'optimal' bipartition is NP-hard (Gan, 2007).
 
-# DIANA - Divisive Hierarchical Clustering
+# A. DIANA - Divisive Hierarchical Clustering
 
 Commonly known by its moniker 'DIANA' in the field data analytics, this popular divisive hierarchical cluster algorithm proceeds in such a manner: a series of successive splits operated over the cluster of maximal diameter at each given step. This continues until step $n-1$ at which each observation or object is its own cluster, but also allows for a $k$ number of clusters to be specified at which to stop clustering.
 
@@ -260,6 +260,14 @@ print(cluster_assignments)
 table(cluster_assignments)
 
 ```
+
+# B. DISMEA 
+
+This divisive method uses the $k$-means algorithm to subdivide a cluster into two. This method produces an $n$ level hierarchy where $n$ is also the size of the given data set. Similar to DIANA, the algorithm begins with the entire data set as a single cluster $C$ and at each step it splits the cluster with the largest sum of squared distances (SSD). This means that a maximum number of clusters $k_{max}(\leq n)$ is specified in the DISMEA algorithm. (Gan, 2007).
+
+# C. Edwards & Cavalli-Sforza
+
+This hierarchical divisive algorithm splits observations into two groups by maximizing the *between-cluster* sum of squares. The *within-cluster sum of squares* (WSS) divided by the number of points (the variance of the cluster) represents cluster density. This algorithm splits the initial cluster into two by enumerating all possible bipartitions and minimizing the WSS at that split level. In this algorithm, the best partition may not be unique in some cases. Another problem is that the initial computation requires an evaluation of all $2^{n-1}-1$ possible splits
 
 # **Dendrogram**
 
