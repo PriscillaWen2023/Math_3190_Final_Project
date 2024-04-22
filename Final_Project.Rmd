@@ -744,7 +744,7 @@ $$
 DB \equiv \dfrac{1}{N} \sum_{i=1}^{N}D_i
 $$
 
-The index thus represents an average over all the $i$ clusters. Plotting this against the number of clusters it is calculated over can be a good measure of deciding how many clusters exist, or where to restrict splits. This index can be improved (that is, the value lowered) by increasing inter-cluster separation and intra-cluster cohesion.
+The index thus represents an average over all the $i$ clusters. Plotting this against the number of clusters it is calculated over can be a good measure of deciding how many clusters exist, or where to restrict splits. This index can be improved (that is, the value lowered) by increasing inter-cluster separation and intra-cluster cohesion (Davies, 1979).
 
 # Completing Analysis
 
@@ -849,6 +849,8 @@ Let's summarize the features of each cluster based on the provided cluster profi
 -   Everitt, B. S., Landau, S., Leese, M., & Stahl, D. (2011). Hierarchical clustering. Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 1(1), 14-23.
 
 -   Murtagh, F. (2011). On ultrametricity, data coding, and computation. Journal of Classification, 28(3), 326-347.
+
+-   Davies, David L., Bouldin, Donald W., (1979). A Cluster Separation Measure. IEEE Transactions on Pattern Analysis and Machine Intelligence. PAMI-1 (2): 224-227.
 
 -   R Development Core Team (2021). R: A language and environment for statistical computing. R Foundation for Statistical Computing.
 
