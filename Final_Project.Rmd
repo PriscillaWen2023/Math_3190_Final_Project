@@ -639,7 +639,7 @@ $$
 
 -   $a_i$​ represents the average distance from $i$ to all other points in the same cluster.
 
--    $b_i$​ represents the minimum average distance from $i$ to all points in neighboring clusters.
+-   $b_i$​ represents the minimum average distance from $i$ to all points in neighboring clusters.
 
 4.  Repeat steps (1)-(3) for all data points.
 5.  Finally, compute the overall Silhouette Coefficient as the mean of all $s_i$​ values.
@@ -887,7 +887,7 @@ shinyApp(ui, server)
 
 #### Footnote: Divisive Clustering R Shiny App (DIANA)
 
-``` {r}
+```{r}
 # Dendogram Viewer v.2
 
 library(shiny)
@@ -964,4 +964,3 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
-
